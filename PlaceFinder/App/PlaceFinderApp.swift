@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct PlaceFinderApp: App {
+    @StateObject private var mainCoordinator: AppCoordinator
+    
+    init() {
+        _mainCoordinator = .init(wrappedValue: AppCoordinator())
+    }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppContentView(mainCoordinator: mainCoordinator)
         }
     }
 }
