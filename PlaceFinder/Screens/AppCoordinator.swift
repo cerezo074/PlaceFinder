@@ -40,7 +40,10 @@ class AppCoordinator: ObservableObject {
                 )
             )
         case .home:
-            ListPlacesView(domainDependencies: appDomains.listPlaces)
+            ListPlacesView(
+                domainDependencies: appDomains.listPlaces,
+                appCoordinator: self
+            )
         }
     }
     

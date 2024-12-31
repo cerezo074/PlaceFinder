@@ -7,14 +7,21 @@
 import SwiftUI
 
 struct ListPlacesView: View {
-    @StateObject private var viewModel: ListPlacesViewModel
     
-    init(domainDependencies: ListPlacesViewModel.DomainDependencies) {
+    @StateObject
+    private var viewModel: ListPlacesViewModel
+    @State
+    private var isLandscape: Bool
+    private let appCoordinator: AppCoordinator
+    
+    init(
+        domainDependencies: ListPlacesViewModel.DomainDependencies,
+        appCoordinator: AppCoordinator
+    ) {
         _viewModel = .init(wrappedValue: .init(domainDependencies: domainDependencies))
+        isLandscape = UIDevice.current.orientation.isLandscape
+        self.appCoordinator = appCoordinator
     }
-
-    @Environment(\.horizontalSizeClass)
-    var horizontalSizeClass
 
     var body: some View {
         switch viewModel.viewState {
@@ -27,6 +34,7 @@ struct ListPlacesView: View {
             retryButton
         case .showCountries(let list):
             displayCountries(with: list)
+                .detectLandscape($isLandscape)
         }
     }
     
@@ -55,65 +63,40 @@ struct ListPlacesView: View {
     
     private func displayCountries(with countries: [String]) -> some View {
         Group {
-            if horizontalSizeClass == .compact {
-                MasterView(items: countries, selectedItem: $viewModel.selectedItem)
-                        .navigationTitle("Items")
-            } else {
+            if isLandscape {
                 HStack {
-                    MasterView(items: countries, selectedItem: $viewModel.selectedItem)
-                        .frame(maxWidth: 300)
-                        .background(Color(UIColor.systemGroupedBackground))
-                    Divider()
-                    DetailView(selectedItem: viewModel.selectedItem)
+                    MasterView(
+                        selectedItem: $viewModel.selectedItem,
+                        items: countries
+                    )
+                    .frame(maxWidth: 300)
+                    .background(Color(UIColor.systemGroupedBackground))
+                    DetailView(selectedItem: viewModel.selectedItem, backButtonAction: nil)
                         .frame(maxWidth: .infinity)
                         .background(Color(UIColor.systemBackground))
                 }
                 .navigationTitle("Master-Detail")
-            }
-        }
-    }
-}
-
-struct MasterView: View {
-    let items: [String]
-    @Binding var selectedItem: String?
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading) {
-                ForEach(items, id: \.self) { item in
-                    Text(item)
-                        .padding()
-                        .background(selectedItem == item ? Color.blue.opacity(0.2) : Color.clear)
-                        .cornerRadius(8)
-                        .onTapGesture {
-                            selectedItem = item
-                        }
+            } else {
+                MasterView(
+                    selectedItem: $viewModel.selectedItem,
+                    items: countries
+                )
+                .onReceive(viewModel.$selectedItem) { selectedItem in
+                    guard let selectedItem else { return }
+                    appCoordinator.baseNavigationPath.append(selectedItem)
                 }
+                .navigationTitle("Items")
             }
-            .padding()
-        }
-    }
-}
-
-struct DetailView: View {
-    let selectedItem: String?
-
-    var body: some View {
-        ScrollView {
-            VStack {
-                if let selectedItem = selectedItem {
-                    Text("Detail for \(selectedItem)")
-                        .font(.largeTitle)
-                        .padding()
-                } else {
-                    Text("Select an item from the list")
-                        .font(.title)
-                        .foregroundColor(.gray)
-                        .padding()
-                }
+        }.onChange(of: isLandscape, { oldValue, newValue in
+            if newValue, !appCoordinator.baseNavigationPath.isEmpty {
+                appCoordinator.baseNavigationPath = .init()
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        })
+        .navigationDestination(for: String.self) { selectedItem in
+            DetailView(selectedItem: selectedItem) {
+                viewModel.selectedItem = nil
+                appCoordinator.baseNavigationPath.removeLast()
+            }
         }
     }
 }

@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-
-
 struct AppContentView: View {
     @ObservedObject private var mainCoordinator: AppCoordinator
     
@@ -26,5 +24,3 @@ struct AppContentView: View {
         }
     }
 }
-
-
