@@ -18,11 +18,7 @@ protocol ListPlaces {
 
 class PlacesController: ListPlaces {
     private var data: [String] = []
-    
-    var needsToLoad: Bool {
-        data.isEmpty
-    }
-    
+
     func loadData() async {
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         data = ["Colombia", "Peru", "Argentina"]
