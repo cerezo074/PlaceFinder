@@ -33,7 +33,9 @@ class ListPlacesViewModel: ObservableObject {
         }
         
         do {
-            let countries = try await domainDependencies.getAllPlaces()
+            let countries = try await domainDependencies.getAllPlaces().enumerated().map { (index, value) in
+                "\(index). \(value.name), \(value.country)"
+            }
             
             await callOnMainThread { [weak self] in
                 self?.viewState = .showCountries(list: countries)

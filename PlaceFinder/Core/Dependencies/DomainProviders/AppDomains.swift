@@ -10,7 +10,7 @@ typealias AppDomains = ListPlacesProvider
 class PlaceFinderDomains: AppDomains {
     let listPlaces: ListPlaces
     
-    init(listPlaces: ListPlaces? = nil) {
-        self.listPlaces = listPlaces ?? PlacesController()
+    init(listPlaces: ListPlaces) {
+        self.listPlaces = listPlaces
     }
 }

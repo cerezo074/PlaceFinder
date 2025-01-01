@@ -13,7 +13,7 @@ struct MasterView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading) {
+            LazyVStack(alignment: .leading) {
                 ForEach(items, id: \.self) {
                     makeItem($0)
                 }
@@ -24,12 +24,15 @@ struct MasterView: View {
     }
     
     private func makeItem(_ item: String) -> some View {
-        Text(item)
-            .padding()
-            .background(selectedItem == item ? Color.blue.opacity(0.2) : Color.clear)
-            .cornerRadius(8)
-            .onTapGesture {
-                selectedItem = item
-            }
+        HStack {
+            Text(item)
+                .padding()
+                .cornerRadius(8)
+                .onTapGesture {
+                    selectedItem = item
+                }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(selectedItem == item ? Color.yellow.opacity(0.6) : Color.clear)
     }
 }
