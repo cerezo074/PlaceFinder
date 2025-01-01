@@ -13,7 +13,7 @@ struct DetailView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack {
+            LazyVStack {
                 if let selectedItem = selectedItem {
                     Text("Detail for \(selectedItem)")
                         .font(.largeTitle)

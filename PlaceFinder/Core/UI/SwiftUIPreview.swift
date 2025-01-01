@@ -14,7 +14,7 @@ struct EmptyFactory {
             
         }
         
-        func getAllPlaces() async throws -> [String] {
+        func getAllPlaces() async throws -> [PlaceEntity] {
             []
         }
     }

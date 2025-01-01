@@ -19,10 +19,19 @@ class AppCoordinator: ObservableObject {
     var baseNavigationPath: NavigationPath
     @Published
     private(set) var appState: AppState
-    private(set) var appDomains: AppDomains
+    private let appDomains: AppDomains
+    private let appServices: AppServices
     
-    init(appDomains: AppDomains? = nil) {
-        self.appDomains = appDomains ?? PlaceFinderDomains()
+    init(
+        appDomains: AppDomains? = nil,
+        appServices: AppServices? = nil
+    ) {
+        let appServices = appServices ?? PlaceFinderServices()
+        let appDomains = appDomains ?? PlaceFinderDomains(
+            listPlaces: PlacesController(repository: appServices.listPlacesDataServices)
+        )
+        self.appServices = appServices
+        self.appDomains = appDomains
         self.baseNavigationPath = .init()
         self.appState = .onStartup
     }

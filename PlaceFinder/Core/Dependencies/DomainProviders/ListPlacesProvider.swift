@@ -13,19 +13,22 @@ protocol ListPlacesProvider {
 
 protocol ListPlaces {
     func loadData() async
-    func getAllPlaces() async throws -> [String]
+    func getAllPlaces() async throws -> [PlaceEntity]
 }
 
 class PlacesController: ListPlaces {
-    private var data: [String] = []
+    private let repository: ListPlacesDataServices
+    
+    init(repository: ListPlacesDataServices) {
+        self.repository = repository
+    }
 
     func loadData() async {
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
-        data = ["Colombia", "Peru", "Argentina"]
+        await repository.loadAllPlaces()
     }
     
-    func getAllPlaces() async throws -> [String] {
-        return data
+    func getAllPlaces() async throws -> [PlaceEntity] {
+        try await repository.fetchAllPlaces()
     }
 }
 
