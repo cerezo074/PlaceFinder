@@ -37,7 +37,7 @@ enum PlaceEndpointTypes {
     var method: RestfulEndpoint.HTTPMethod {
         switch self {
         case .fetchAll:
-                .get
+            return .get
         }
     }
     
@@ -47,7 +47,7 @@ enum PlaceEndpointTypes {
             return [:]
         }
     }
-        
+    
     func makeURLRequest() -> URLRequest? {
         let restfulEndpoint = switch self {
         case .fetchAll:
