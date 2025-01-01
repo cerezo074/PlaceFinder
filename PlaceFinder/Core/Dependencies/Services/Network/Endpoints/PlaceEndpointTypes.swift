@@ -7,7 +7,11 @@
 
 import Foundation
 
-enum PlaceEndpointTypes {
+protocol RestfulRequestGenerator {
+    func makeRequest() -> URLRequest?
+}
+
+enum PlaceEndpointTypes: RestfulRequestGenerator {
     case fetchAll
     
     var scheme: String {
@@ -48,19 +52,14 @@ enum PlaceEndpointTypes {
         }
     }
     
-    func makeURLRequest() -> URLRequest? {
-        let restfulEndpoint = switch self {
-        case .fetchAll:
-            RestfulEndpoint(
-                scheme: scheme,
-                host: host,
-                path: path,
-                method: method,
-                queryParams: queryParams,
-                headers: headers
-            )
-        }
-        
-        return restfulEndpoint.makeURLRequest()
+    func makeRequest() -> URLRequest? {
+        RestfulEndpoint(
+            scheme: scheme,
+            host: host,
+            path: path,
+            method: method,
+            queryParams: queryParams,
+            headers: headers
+        ).makeURLRequest()
     }
 }

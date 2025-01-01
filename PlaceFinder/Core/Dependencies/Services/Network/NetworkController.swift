@@ -13,8 +13,8 @@ protocol NetworkProvider {
 
 protocol NetworkServices {
     func fetchData<T: Decodable>(
-        with type: T.Type?,
-        from endpoint: PlaceEndpointTypes
+        of type: T.Type?,
+        with requestGenerator: RestfulRequestGenerator
     ) async throws -> T?
 }
 
@@ -27,10 +27,10 @@ class NetworkController: NetworkServices {
     }
     
     func fetchData<T: Decodable>(
-        with type: T.Type?,
-        from endpoint: PlaceEndpointTypes
+        of type: T.Type?,
+        with requestGenerator: RestfulRequestGenerator
     ) async throws -> T? {
-        guard let request = endpoint.makeURLRequest() else {
+        guard let request = requestGenerator.makeRequest() else {
             throw URLError(.badURL)
         }
 

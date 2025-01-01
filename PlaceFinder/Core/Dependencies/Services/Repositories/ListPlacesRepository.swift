@@ -29,7 +29,10 @@ class ListPlacesRepository: ListPlacesDataServices {
     
     func loadAllPlaces() async {
         do {
-            guard let placesDTO = try await networkServices.fetchData(with: [PlaceDTO].self, from: .fetchAll) else {
+            guard let placesDTO = try await networkServices.fetchData(
+                of: [PlaceDTO].self,
+                with: PlaceEndpointTypes.fetchAll
+            ) else {
                 return
             }
             
@@ -46,7 +49,10 @@ class ListPlacesRepository: ListPlacesDataServices {
             return inMemoryCache
         }
         
-        guard let placesDTO = try await networkServices.fetchData(with: [PlaceDTO].self, from: .fetchAll) else {
+        guard let placesDTO = try await networkServices.fetchData(
+            of: [PlaceDTO].self,
+            with: PlaceEndpointTypes.fetchAll
+        ) else {
             return []
         }
         
