@@ -13,7 +13,7 @@ protocol ListPlacesProvider {
 
 protocol ListPlaces {
     func loadData() async
-    func getAllPlaces() async throws -> [PlaceEntity]
+    func getAllPlaces() async throws -> [PlaceModel]
 }
 
 class PlacesController: ListPlaces {
@@ -27,7 +27,7 @@ class PlacesController: ListPlaces {
         await repository.loadAllPlaces()
     }
     
-    func getAllPlaces() async throws -> [PlaceEntity] {
+    func getAllPlaces() async throws -> [PlaceModel] {
         try await repository.fetchAllPlaces()
     }
 }

@@ -1,12 +1,11 @@
 //
-//  CoordinateEntity.swift
+//  CoordinateModel.swift
 //  PlaceFinder
 //
 //  Created by Eli Pacheco Hoyos on 31/12/24.
 //
 
-
-struct CoordinateEntity: Codable, Hashable {
+struct CoordinateModel: Codable, Hashable {
     let lon: Double
     let lat: Double
     
@@ -18,5 +17,10 @@ struct CoordinateEntity: Codable, Hashable {
     init(from DTO: CoordinateDTO) {
         self.lat = DTO.lat
         self.lon = DTO.lon
+    }
+    
+    init(from entity: CoordinateEntity?) {
+        self.lat = entity?.lat ?? Double.nan
+        self.lon = entity?.lon ?? Double.nan
     }
 }
