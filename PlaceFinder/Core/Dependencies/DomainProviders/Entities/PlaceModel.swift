@@ -25,6 +25,6 @@ struct PlaceModel: Codable, Hashable {
     init(from entity: PlaceEntity) {
         self.country = entity.country
         self.name = entity.name
-        self.coordinate = CoordinateModel(from: entity.coordinate)
+        self.coordinate = CoordinateModel(lon: entity.lon, lat: entity.lon)
     }
 }

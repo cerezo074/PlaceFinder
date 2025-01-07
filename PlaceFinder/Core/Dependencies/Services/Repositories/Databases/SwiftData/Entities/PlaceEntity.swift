@@ -16,34 +16,32 @@ final class PlaceEntity: Hashable {
     private(set) var country: String
     private(set) var name: String
     private(set) var isFavorite: Bool
-    var coordinate: CoordinateEntity?
-
+    private(set) var lon: Double
+    private(set) var lat: Double
+    
     init(
         country: String,
         name: String,
-        coordinate: CoordinateEntity?,
+        lon: Double,
+        lat: Double,
         isFavorite: Bool
     ) {
-        self.id = "\(country),\(name),\(coordinate?.id ?? "")"
+        self.id = "\(country),\(name),\(lat),\(lon)"
         self.country = country
         self.name = name
-        self.coordinate = coordinate
+        self.lat = lat
+        self.lon = lon
         self.isFavorite = isFavorite
     }
     
     static func makeEntity(from DTO: PlaceDTO) -> PlaceEntity {
-        let coordinate = CoordinateEntity(
-            lon: DTO.coordinate.lon,
-            lat: DTO.coordinate.lat
-        )
-        
         let entity = PlaceEntity(
             country: DTO.country,
             name: DTO.name,
-            coordinate: coordinate,
+            lon: DTO.coordinate.lon,
+            lat: DTO.coordinate.lat,
             isFavorite: false
         )
-        coordinate.place = entity
         
         return entity
     }
