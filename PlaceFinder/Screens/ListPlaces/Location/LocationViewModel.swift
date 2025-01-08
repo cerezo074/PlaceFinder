@@ -35,7 +35,7 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
     }
     
     var menuTitle: String {
-        "\(index + 1). \(name) - \(country)"
+        "\(index + 1). \(name), \(country)"
     }
     
     var locationCoordinate: CLLocationCoordinate2D {

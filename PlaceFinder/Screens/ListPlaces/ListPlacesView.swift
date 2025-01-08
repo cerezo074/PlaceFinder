@@ -62,7 +62,7 @@ struct ListPlacesView: View {
     }
     
     private func displayCountries(with countries: [LocationViewModel]) -> some View {
-        Group {
+        ZStack {
             if isLandscape {
                 HStack {
                     LocationMenuView(

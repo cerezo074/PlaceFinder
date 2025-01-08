@@ -18,12 +18,12 @@ protocol ListPlacesDataServices {
 
 class ListPlacesRepository: ListPlacesDataServices {
     private let networkServices: NetworkServices
-    private let placesDB: any SwiftDatabase<PlaceEntity>
+    private let placesDB: any Database<PlaceEntity>
     private var inMemoryPlaces: [PlaceModel]
     
     init(
         networkServices: NetworkServices,
-        placesDB: any SwiftDatabase<PlaceEntity>
+        placesDB: any Database<PlaceEntity>
     ) {
         self.placesDB = placesDB
         self.networkServices = networkServices
