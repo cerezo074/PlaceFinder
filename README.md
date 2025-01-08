@@ -43,7 +43,7 @@ PlaceFinder is a SwiftUI-based app designed to help users browse and explore cit
 - **SwiftData**: For storing city data offline and persisting favorite cities.
 - **MapKit**: For displaying city locations on a map.
 - **Combine**: For managing state and implementing debounce functionality for search input.
-- **NavigationSplitView**: For adaptive navigation, displaying master and detail views simultaneously in landscape mode or on larger screens.
+- **NavigationSplitView**: For adaptive navigation, displaying master and detail views simultaneously in landscape mode or on larger screens. Not currently used, but i will compare this with a manual approach.
 - **Async/Await**: For handling asynchronous tasks such as data loading.
 - **SwiftTests**: For comprehensive unit and UI testing.
 - **Trie Data Structure**: For efficient prefix searching on favorite cities.
