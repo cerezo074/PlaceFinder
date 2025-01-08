@@ -1,5 +1,5 @@
 //
-//  PlaceValidatorProvider.swift
+//  GeoCodeValidator.swift
 //  PlaceFinder
 //
 //  Created by Eli Pacheco Hoyos on 8/01/25.

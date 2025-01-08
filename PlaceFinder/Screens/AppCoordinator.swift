@@ -27,12 +27,7 @@ class AppCoordinator: ObservableObject {
         appServices: AppServices? = nil
     ) {
         let appServices = appServices ?? PlaceFinderServices()
-        let appDomains = appDomains ?? PlaceFinderDomains(
-            placesController: PlacesController(
-                repository: appServices.listPlacesDataProvider,
-                validator: appServices.placeValidatorProvider
-            )
-        )
+        let appDomains = appDomains ?? PlaceFinderDomains(appServices: appServices)
         self.appServices = appServices
         self.appDomains = appDomains
         self.baseNavigationPath = .init()

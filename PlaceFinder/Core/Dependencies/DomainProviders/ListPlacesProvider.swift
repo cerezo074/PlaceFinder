@@ -17,8 +17,8 @@ protocol PlacesServices {
 }
 
 class PlacesController: PlacesServices, PlaceValidatorServices {
-    private unowned let repository: ListPlacesDataServices
-    private unowned let validator: PlaceValidatorServices
+    private let repository: ListPlacesDataServices
+    private let validator: PlaceValidatorServices
     
     init(
         repository: ListPlacesDataServices,

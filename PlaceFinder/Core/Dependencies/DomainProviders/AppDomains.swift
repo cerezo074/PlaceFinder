@@ -19,7 +19,15 @@ class PlaceFinderDomains: AppDomains {
         placesController
     }
     
-    init(placesController: PlacesServices & PlaceValidatorServices) {
-        self.placesController = placesController
+    init(appServices: AppServices) {
+        let repository = ListPlacesRepository.init(
+            networkServices: appServices.networkProvider,
+            placesDB: appServices.placesDataProvider
+        )
+        
+        self.placesController = PlacesController(
+            repository: repository,
+            validator: appServices.placeValidatorProvider
+        )
     }
 }

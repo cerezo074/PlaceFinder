@@ -15,3 +15,9 @@ protocol Database<T> {
     func update(_ item: T) throws
     func delete(_ item: T) throws
 }
+
+protocol PlacesDataProvider {
+    var placesDataProvider: any PlaceDataServices { get }
+}
+
+typealias PlaceDataServices = Database<PlaceEntity>
