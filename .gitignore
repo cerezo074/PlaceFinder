@@ -17,7 +17,7 @@
 
 # Xcode specific files
 ## User settings
-xcuserdata/
+**/xcuserdata/
 
 ## Compatibility with Xcode 8 and earlier
 *.xcscmblueprint
