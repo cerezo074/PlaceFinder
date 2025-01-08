@@ -44,6 +44,21 @@ class ListPlacesRepository: ListPlacesDataServices {
         }
     }
     
+    func fetchAllPlaces() async throws -> [PlaceModel] {
+        if !inMemoryPlaces.isEmpty {
+            return inMemoryPlaces
+        }
+        
+        guard let placesDTO = try await networkServices.fetchData(
+            of: [PlaceDTO].self,
+            with: PlaceEndpointTypes.fetchAll
+        ) else {
+            return []
+        }
+        
+        return placesDTO.map { PlaceModel(from: $0) }
+    }
+    
     private func loadFromLocalSource() async throws -> [PlaceModel] {
         // TODO: We gotta read it by batches and not all at once like with a pagination
         return try await placesDB.read(
@@ -71,25 +86,11 @@ class ListPlacesRepository: ListPlacesDataServices {
             }
         }
         
-        inMemoryPlaces = placesDTO.map { PlaceModel(from: $0) }
+        inMemoryPlaces = placesDTO
+            .map { PlaceModel(from: $0) }
             .sorted { leftModel, rightModel in
                 leftModel.name < rightModel.name && leftModel.country < rightModel.country
             }
-    }
-    
-    func fetchAllPlaces() async throws -> [PlaceModel] {
-        if !inMemoryPlaces.isEmpty {
-            return inMemoryPlaces
-        }
-        
-        guard let placesDTO = try await networkServices.fetchData(
-            of: [PlaceDTO].self,
-            with: PlaceEndpointTypes.fetchAll
-        ) else {
-            return []
-        }
-        
-        return placesDTO.map { PlaceModel(from: $0) }
     }
     
 }

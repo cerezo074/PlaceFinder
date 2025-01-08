@@ -12,13 +12,13 @@ class ListPlacesViewModel: ObservableObject {
     enum ViewState {
         case loading
         case retry
-        case showCountries(list: [String])
+        case showCountries(locations: [LocationViewModel])
     }
     
     @Published
     private(set) var viewState: ViewState
     @Published
-    var selectedItem: String?
+    var selectedItem: LocationViewModel?
 
     private let domainDependencies: DomainDependencies
     
@@ -34,11 +34,17 @@ class ListPlacesViewModel: ObservableObject {
         
         do {
             let countries = try await domainDependencies.getAllPlaces().enumerated().map { (index, value) in
-                "\(index). \(value.name), \(value.country)"
+                LocationViewModel(
+                    index: index,
+                    name: value.name,
+                    country: value.country,
+                    latitude: value.coordinate.lat,
+                    longitude: value.coordinate.lon
+                )
             }
             
             await callOnMainThread { [weak self] in
-                self?.viewState = .showCountries(list: countries)
+                self?.viewState = .showCountries(locations: countries)
             }
         } catch {
             await callOnMainThread { [weak self] in

@@ -1,5 +1,5 @@
 //
-//  MasterView.swift
+//  LocationMenuView.swift
 //  PlaceFinder
 //
 //  Created by Eli Pacheco Hoyos on 30/12/24.
@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct MasterView: View {
-    @Binding var selectedItem: String?
-    let items: [String]
+struct LocationMenuView: View {
+    @Binding var selectedItem: LocationViewModel?
+    let items: [LocationViewModel]
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -23,9 +23,9 @@ struct MasterView: View {
         }
     }
     
-    private func makeItem(_ item: String) -> some View {
+    private func makeItem(_ item: LocationViewModel) -> some View {
         HStack {
-            Text(item)
+            Text(item.menuTitle)
                 .padding()
                 .cornerRadius(8)
                 .onTapGesture {

@@ -61,23 +61,21 @@ struct ListPlacesView: View {
         }
     }
     
-    private func displayCountries(with countries: [String]) -> some View {
+    private func displayCountries(with countries: [LocationViewModel]) -> some View {
         Group {
             if isLandscape {
                 HStack {
-                    MasterView(
+                    LocationMenuView(
                         selectedItem: $viewModel.selectedItem,
                         items: countries
                     )
                     .frame(maxWidth: 300)
                     .background(Color(UIColor.systemGroupedBackground))
-                    DetailView(selectedItem: viewModel.selectedItem, backButtonAction: nil)
-                        .frame(maxWidth: .infinity)
-                        .background(Color(UIColor.systemBackground))
+                    landscapeMapView
                 }
                 .navigationTitle("Master-Detail")
             } else {
-                MasterView(
+                LocationMenuView(
                     selectedItem: $viewModel.selectedItem,
                     items: countries
                 )
@@ -92,11 +90,28 @@ struct ListPlacesView: View {
                 appCoordinator.baseNavigationPath = .init()
             }
         })
-        .navigationDestination(for: String.self) { selectedItem in
-            DetailView(selectedItem: selectedItem) {
+        .navigationDestination(for: LocationViewModel.self) { selectedItem in
+            LocationMapView(selectedItem: selectedItem) {
                 viewModel.selectedItem = nil
                 appCoordinator.baseNavigationPath.removeLast()
             }
+        }
+    }
+    
+    @ViewBuilder
+    private var landscapeMapView: some View {
+        if let selectedItem = viewModel.selectedItem {
+            LocationMapView(
+                selectedItem: selectedItem,
+                backButtonAction: nil
+            )
+            .frame(maxWidth: .infinity)
+            .background(Color(UIColor.systemBackground))
+        } else {
+            Text("Select an item from the list")
+                .font(.title)
+                .foregroundColor(.gray)
+                .padding()
         }
     }
 }
