@@ -17,11 +17,21 @@ protocol SwiftDatabase<T>: Database {
 extension SwiftDatabase {
     
     func create<T: PersistentModel>(_ items: [T]) throws {
+        let batchSize = 1000
         let context = ModelContext(container)
-        for item in items {
+        
+        for (index, item) in items.enumerated() {
             context.insert(item)
+            // Save the context after every batchSize insertions
+            if (index + 1) % batchSize == 0 {
+                try context.save()
+            }
         }
-        try context.save()
+        
+        // Save any remaining items that didn't fill a complete batch
+        if items.count % batchSize != 0 {
+            try context.save()
+        }
     }
     
     func create<T: PersistentModel>(_ item: T) throws {

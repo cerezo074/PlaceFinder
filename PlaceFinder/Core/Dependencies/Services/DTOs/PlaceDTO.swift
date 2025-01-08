@@ -5,7 +5,7 @@
 //  Created by Eli Pacheco Hoyos on 31/12/24.
 //
 
-struct PlaceDTO: Decodable {
+struct PlaceDTO: Decodable, Hashable {
     let country: String
     let name: String
     let id: Int
@@ -17,9 +17,15 @@ struct PlaceDTO: Decodable {
         case id = "_id"
         case coordinate = "coord"
     }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(country)
+        hasher.combine(name)
+        hasher.combine(coordinate)
+    }
 }
 
-struct CoordinateDTO: Codable {
+struct CoordinateDTO: Codable, Hashable {
     let lon: Double
     let lat: Double
 }

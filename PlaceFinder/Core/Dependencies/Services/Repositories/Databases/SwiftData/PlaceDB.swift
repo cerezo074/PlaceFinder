@@ -17,6 +17,7 @@ final class PlaceDB: SwiftDatabase {
     ///
     init(useInMemoryStore: Bool = false) throws {
         let configuration = ModelConfiguration(for: PlaceEntity.self, isStoredInMemoryOnly: useInMemoryStore)
+        print("SQLite Database location: \(configuration.url)")
         container = try ModelContainer(for: PlaceEntity.self, configurations: configuration)
     }
 }

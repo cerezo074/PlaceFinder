@@ -58,9 +58,12 @@ class ListPlacesRepository: ListPlacesDataServices {
             with: PlaceEndpointTypes.fetchAll
         ) ?? []
         
+        
         // This is done in parallel, there is not need to make users wait for this
         Task {
-            let placesEntities = placesDTO.map { PlaceEntity.makeEntity(from: $0) }
+            // Removes possible duplicates
+            let placesDTOSet = Set(placesDTO)
+            let placesEntities = placesDTOSet.map { PlaceEntity(from: $0) }
             do {
                 try placesDB.create(placesEntities)
             } catch {

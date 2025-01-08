@@ -9,15 +9,15 @@ import SwiftData
 import Foundation
 
 @Model
-final class PlaceEntity: Hashable {
+final class PlaceEntity {
     
     @Attribute(.unique)
     private(set) var id: String
     private(set) var country: String
     private(set) var name: String
-    private(set) var isFavorite: Bool
     private(set) var lon: Double
     private(set) var lat: Double
+    var isFavorite: Bool
     
     init(
         country: String,
@@ -34,19 +34,13 @@ final class PlaceEntity: Hashable {
         self.isFavorite = isFavorite
     }
     
-    static func makeEntity(from DTO: PlaceDTO) -> PlaceEntity {
-        let entity = PlaceEntity(
+    convenience init(from DTO: PlaceDTO) {
+        self.init(
             country: DTO.country,
             name: DTO.name,
             lon: DTO.coordinate.lon,
             lat: DTO.coordinate.lat,
             isFavorite: false
         )
-        
-        return entity
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
     }
 }

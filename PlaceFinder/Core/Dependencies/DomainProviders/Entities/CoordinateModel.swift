@@ -18,9 +18,5 @@ struct CoordinateModel: Codable, Hashable {
         self.lat = DTO.lat
         self.lon = DTO.lon
     }
-    
-    init(from entity: CoordinateEntity?) {
-        self.lat = entity?.lat ?? Double.nan
-        self.lon = entity?.lon ?? Double.nan
-    }
+
 }
