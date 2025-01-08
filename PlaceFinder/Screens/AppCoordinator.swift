@@ -25,8 +25,8 @@ class AppCoordinator: ObservableObject {
     init(
         appDomains: AppDomains? = nil,
         appServices: AppServices? = nil
-    ) {
-        let appServices = appServices ?? PlaceFinderServices()
+    ) throws {
+        let appServices = if let appServices { appServices } else { try PlaceFinderServices() }
         let appDomains = appDomains ?? PlaceFinderDomains(
             listPlaces: PlacesController(repository: appServices.listPlacesDataServices)
         )

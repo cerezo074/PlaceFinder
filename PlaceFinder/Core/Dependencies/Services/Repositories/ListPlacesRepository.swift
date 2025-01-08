@@ -13,40 +13,73 @@ protocol ListPlacesDataProvider {
 
 protocol ListPlacesDataServices {
     func loadAllPlaces() async
-    func fetchAllPlaces() async throws -> [PlaceEntity]
+    func fetchAllPlaces() async throws -> [PlaceModel]
 }
 
 class ListPlacesRepository: ListPlacesDataServices {
-    
     private let networkServices: NetworkServices
-    private var inMemoryCache: [PlaceEntity] = []
+    private let placesDB: any SwiftDatabase<PlaceEntity>
+    private var inMemoryPlaces: [PlaceModel]
     
     init(
-        networkServices: NetworkServices
+        networkServices: NetworkServices,
+        placesDB: any SwiftDatabase<PlaceEntity>
     ) {
+        self.placesDB = placesDB
         self.networkServices = networkServices
+        inMemoryPlaces = []
     }
     
     func loadAllPlaces() async {
         do {
-            guard let placesDTO = try await networkServices.fetchData(
-                of: [PlaceDTO].self,
-                with: PlaceEndpointTypes.fetchAll
-            ) else {
+            inMemoryPlaces = try await loadFromLocalSource()
+            
+            if !inMemoryPlaces.isEmpty {
                 return
             }
             
-            inMemoryCache = placesDTO.map { PlaceEntity(from: $0) }
+            try await loadFromRemoteSource()
         } catch {
             print("Error: \(error)")
         }
-        
-        // TODO: Needs to retrieve it with SwiftData and first we will check againts data base.
     }
     
-    func fetchAllPlaces() async throws -> [PlaceEntity] {
-        if !inMemoryCache.isEmpty {
-            return inMemoryCache
+    private func loadFromLocalSource() async throws -> [PlaceModel] {
+        // TODO: We gotta read it by batches and not all at once like with a pagination
+        return try await placesDB.read(
+            sortBy: SortDescriptor<PlaceEntity>(\.name), SortDescriptor<PlaceEntity>(\.country)
+        )
+        .map { PlaceModel(from: $0) }
+    }
+    
+    private func loadFromRemoteSource() async throws {
+        let placesDTO = try await networkServices.fetchData(
+            of: [PlaceDTO].self,
+            with: PlaceEndpointTypes.fetchAll
+        ) ?? []
+        
+        
+        // This is done in parallel, there is not need to make users wait for this
+        Task {
+            // Removes possible duplicates
+            let placesDTOSet = Set(placesDTO)
+            let placesEntities = placesDTOSet.map { PlaceEntity(from: $0) }
+            do {
+                try placesDB.create(placesEntities)
+            } catch {
+                print("Error saving places entities to database: \(error)")
+            }
+        }
+        
+        inMemoryPlaces = placesDTO.map { PlaceModel(from: $0) }
+            .sorted { leftModel, rightModel in
+                leftModel.name < rightModel.name && leftModel.country < rightModel.country
+            }
+    }
+    
+    func fetchAllPlaces() async throws -> [PlaceModel] {
+        if !inMemoryPlaces.isEmpty {
+            return inMemoryPlaces
         }
         
         guard let placesDTO = try await networkServices.fetchData(
@@ -56,7 +89,8 @@ class ListPlacesRepository: ListPlacesDataServices {
             return []
         }
         
-        return placesDTO.map { PlaceEntity(from: $0) }
+        return placesDTO.map { PlaceModel(from: $0) }
     }
     
 }
+

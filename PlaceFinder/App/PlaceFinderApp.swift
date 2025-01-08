@@ -12,7 +12,7 @@ struct PlaceFinderApp: App {
     @StateObject private var mainCoordinator: AppCoordinator
     
     init() {
-        _mainCoordinator = .init(wrappedValue: AppCoordinator())
+        _mainCoordinator = .init(wrappedValue: try! AppCoordinator())
     }
     
     var body: some Scene {
