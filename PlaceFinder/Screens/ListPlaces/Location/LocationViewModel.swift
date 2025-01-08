@@ -10,7 +10,8 @@ import SwiftUI
 import MapKit
 
 class LocationViewModel: ObservableObject, Identifiable, Hashable {
-    
+    typealias DomainDependencies = PlaceValidatorServices
+
     enum LocationState: Hashable {
         case loading
         case success
@@ -18,17 +19,18 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
     }
     
     @Published
-    var locationState: LocationState = .loading
-    
+    var locationState: LocationState
     let index: Int
     let name: String
     let country: String
     let latitude: Double
     let longitude: Double
-    
-    var id: Int { index }
-    
+        
     // MARK: - Computed
+    
+    var id: Int {
+        index
+    }
     
     var detailTitle: String {
         name
@@ -42,45 +44,35 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
     
-    init(index: Int,
-         name: String,
-         country: String,
-         latitude: Double,
-         longitude: Double
+    private let domainDependencies: DomainDependencies
+    
+    init(
+        index: Int,
+        name: String,
+        country: String,
+        latitude: Double,
+        longitude: Double,
+        domainDependencies: DomainDependencies
     ) {
         self.index = index
         self.name = name
         self.country = country
         self.latitude = latitude
         self.longitude = longitude
+        locationState = .loading
+        self.domainDependencies = domainDependencies
     }
 
     func validateLocation() async {
-        if !isValidCoordinate(locationCoordinate) {
-            await callOnMainThread { [weak self] in
-                self?.locationState = .failure("Invalid or unknown location.")
-            }
-            
-            return
-        }
-        
-        let clLocation = CLLocation(latitude: locationCoordinate.latitude,
-                                    longitude: locationCoordinate.longitude)
-        let geocoder = CLGeocoder()
-
         do {
-            let placemarks = try await geocoder.reverseGeocodeLocation(clLocation)
+            try await domainDependencies.isLocationValid(lat: latitude, lng: longitude)
             
             await callOnMainThread { [weak self] in
-                if placemarks.isEmpty {
-                    self?.locationState = .failure("No placemark found at this coordinate.")
-                } else {
-                    self?.locationState = .success
-                }
+                self?.locationState = .success
             }
         } catch {            
             await callOnMainThread { [weak self] in
-                self?.locationState = .failure("Geocoding failed: \(error.localizedDescription)")
+                self?.locationState = .failure("There is an error with the current location: \(error.localizedDescription)")
             }
         }
     }
@@ -93,16 +85,5 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
     
     static func == (lhs: LocationViewModel, rhs: LocationViewModel) -> Bool {
         lhs.id == rhs.id
-    }
-    
-    // MARK: - Private coordinate checker
-    
-    private func isValidCoordinate(_ coordinate: CLLocationCoordinate2D) -> Bool {
-        guard !(coordinate.latitude == 0 && coordinate.longitude == 0),
-              abs(coordinate.latitude) <= 90, abs(coordinate.longitude) <= 180 else {
-            return false
-        }
-        
-        return true
     }
 }

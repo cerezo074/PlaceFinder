@@ -8,19 +8,24 @@
 import Foundation
 
 protocol ListPlacesProvider {
-    var listPlaces: ListPlaces { get }
+    var placesProvider: PlacesServices { get }
 }
 
-protocol ListPlaces {
+protocol PlacesServices {
     func loadData() async
     func getAllPlaces() async throws -> [PlaceModel]
 }
 
-class PlacesController: ListPlaces {
-    private let repository: ListPlacesDataServices
+class PlacesController: PlacesServices, PlaceValidatorServices {
+    private unowned let repository: ListPlacesDataServices
+    private unowned let validator: PlaceValidatorServices
     
-    init(repository: ListPlacesDataServices) {
+    init(
+        repository: ListPlacesDataServices,
+        validator: PlaceValidatorServices
+    ) {
         self.repository = repository
+        self.validator = validator
     }
 
     func loadData() async {
@@ -30,5 +35,8 @@ class PlacesController: ListPlaces {
     func getAllPlaces() async throws -> [PlaceModel] {
         try await repository.fetchAllPlaces()
     }
+    
+    func isLocationValid(lat: Double, lng: Double) async throws {
+        try await validator.isLocationValid(lat: lat, lng: lng)
+    }
 }
-

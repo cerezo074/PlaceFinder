@@ -8,7 +8,7 @@
 import Foundation
 
 class SplashScreenViewModel: ObservableObject {
-    typealias DomainDependencies = ListPlaces
+    typealias DomainDependencies = PlacesServices
 
     @Published
     var isAnimating: Bool = false

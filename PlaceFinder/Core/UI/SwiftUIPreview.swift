@@ -7,9 +7,9 @@
 
 struct EmptyFactory {
     
-    static let emptyListPlaces: ListPlaces = EmptyFactory.EmptyListPlaces()
+    static let emptyListPlaces: PlacesServices = EmptyFactory.EmptyListPlaces()
     
-    struct EmptyListPlaces: ListPlaces {
+    struct EmptyListPlaces: PlacesServices {
         func loadData() async {
             
         }

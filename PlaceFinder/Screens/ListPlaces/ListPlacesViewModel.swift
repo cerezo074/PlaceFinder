@@ -7,7 +7,6 @@
 import Foundation
 
 class ListPlacesViewModel: ObservableObject {
-    typealias DomainDependencies = ListPlaces
     
     enum ViewState {
         case loading
@@ -19,11 +18,15 @@ class ListPlacesViewModel: ObservableObject {
     private(set) var viewState: ViewState
     @Published
     var selectedItem: LocationViewModel?
-
-    private let domainDependencies: DomainDependencies
+    private let placesProvider: PlacesServices
+    private let placesValidator: PlaceValidatorServices
     
-    init(domainDependencies: DomainDependencies) {
-        self.domainDependencies = domainDependencies
+    init(
+        placesProvider: PlacesServices,
+        placesValidator: PlaceValidatorServices
+    ) {
+        self.placesProvider = placesProvider
+        self.placesValidator = placesValidator
         self.viewState = .loading
     }
     
@@ -33,13 +36,14 @@ class ListPlacesViewModel: ObservableObject {
         }
         
         do {
-            let countries = try await domainDependencies.getAllPlaces().enumerated().map { (index, value) in
+            let countries = try await placesProvider.getAllPlaces().enumerated().map { (index, value) in
                 LocationViewModel(
                     index: index,
                     name: value.name,
                     country: value.country,
                     latitude: value.coordinate.lat,
-                    longitude: value.coordinate.lon
+                    longitude: value.coordinate.lon,
+                    domainDependencies: placesValidator
                 )
             }
             

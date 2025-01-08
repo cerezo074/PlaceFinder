@@ -15,10 +15,16 @@ struct ListPlacesView: View {
     private let appCoordinator: AppCoordinator
     
     init(
-        domainDependencies: ListPlacesViewModel.DomainDependencies,
+        placesProvider: PlacesServices,
+        placesValidator: PlaceValidatorServices,
         appCoordinator: AppCoordinator
     ) {
-        _viewModel = .init(wrappedValue: .init(domainDependencies: domainDependencies))
+        _viewModel = .init(
+            wrappedValue: .init(
+                placesProvider: placesProvider,
+                placesValidator: placesValidator
+            )
+        )
         isLandscape = UIDevice.current.orientation.isLandscape
         self.appCoordinator = appCoordinator
     }

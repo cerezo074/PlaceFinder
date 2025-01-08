@@ -8,10 +8,10 @@
 import Foundation
 
 protocol ListPlacesDataProvider {
-    var listPlacesDataServices: ListPlacesDataServices { get }
+    var listPlacesDataProvider: ListPlacesDataServices { get }
 }
 
-protocol ListPlacesDataServices {
+protocol ListPlacesDataServices: AnyObject {
     func loadAllPlaces() async
     func fetchAllPlaces() async throws -> [PlaceModel]
 }

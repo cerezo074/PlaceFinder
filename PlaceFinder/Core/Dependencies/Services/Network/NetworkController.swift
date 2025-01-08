@@ -8,7 +8,7 @@
 import Foundation
 
 protocol NetworkProvider {
-    var networkServices: NetworkServices { get }
+    var networkProvider: NetworkServices { get }
 }
 
 protocol NetworkServices {

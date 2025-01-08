@@ -28,7 +28,10 @@ class AppCoordinator: ObservableObject {
     ) {
         let appServices = appServices ?? PlaceFinderServices()
         let appDomains = appDomains ?? PlaceFinderDomains(
-            listPlaces: PlacesController(repository: appServices.listPlacesDataServices)
+            placesController: PlacesController(
+                repository: appServices.listPlacesDataProvider,
+                validator: appServices.placeValidatorProvider
+            )
         )
         self.appServices = appServices
         self.appDomains = appDomains
@@ -42,7 +45,7 @@ class AppCoordinator: ObservableObject {
         case .onStartup:
             SplashScreenView(
                 viewModel: .init(
-                    domainDependencies: appDomains.listPlaces,
+                    domainDependencies: appDomains.placesProvider,
                     didFinishLoading: { [weak self] in
                         self?.appState = .home
                     }
@@ -50,7 +53,8 @@ class AppCoordinator: ObservableObject {
             )
         case .home:
             ListPlacesView(
-                domainDependencies: appDomains.listPlaces,
+                placesProvider: appDomains.placesProvider,
+                placesValidator: appDomains.placeValidatorProvider,
                 appCoordinator: self
             )
         }
