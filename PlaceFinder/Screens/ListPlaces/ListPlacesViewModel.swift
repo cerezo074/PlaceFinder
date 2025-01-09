@@ -121,9 +121,7 @@ class ListPlacesViewModel: ObservableObject {
     
     private func applyFilter(with text: String) {
         Task {
-            await callOnMainThread { [weak self] in
-                self?.isLoadingSearchResults = true
-            }
+            await displaySearchLoader(!text.isEmpty, show: true)
             
             do {
                 let favoriteLocations = try placesProvider.filterPlaces(by: text)
@@ -146,9 +144,14 @@ class ListPlacesViewModel: ObservableObject {
                 }
             }
             
-            await callOnMainThread { [weak self] in
-                self?.isLoadingSearchResults = false
-            }
+            await displaySearchLoader(!text.isEmpty, show: false)
+        }
+    }
+    
+    private func displaySearchLoader(_ isEnabled: Bool, show: Bool) async {
+        guard isEnabled else { return }
+        await callOnMainThread { [weak self] in
+            self?.isLoadingSearchResults = show
         }
     }
 }
