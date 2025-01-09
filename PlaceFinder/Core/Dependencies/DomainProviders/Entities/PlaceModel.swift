@@ -9,7 +9,7 @@ struct PlaceModel: Codable, Hashable {
     let country: String
     let name: String
     let coordinate: CoordinateModel
-    let isFavorite: Bool
+    var isFavorite: Bool
     
     var id: String {
         "\(country),\(name),\(coordinate.lat),\(coordinate.lon)"
@@ -42,6 +42,16 @@ struct PlaceModel: Codable, Hashable {
         self.country = entity.country
         self.name = entity.name
         self.coordinate = CoordinateModel(lon: entity.lon, lat: entity.lon)
-        self.isFavorite = false
+        self.isFavorite = entity.isFavorite
+    }
+    
+    init(from locationViewModel: LocationViewModel) {
+        self.country = locationViewModel.country
+        self.name = locationViewModel.name
+        self.coordinate = CoordinateModel(
+            lon: locationViewModel.longitude,
+            lat: locationViewModel.latitude
+        )
+        self.isFavorite = locationViewModel.isFavorite
     }
 }

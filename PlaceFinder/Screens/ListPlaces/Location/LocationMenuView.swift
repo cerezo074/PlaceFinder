@@ -15,6 +15,7 @@ struct LocationMenuView: View {
     let placeholder: String
     let isLoading: Bool
     let items: [LocationViewModel]
+    let toggleSelectedItem: (LocationViewModel) -> Void
 
     var body: some View {
         VStack {
@@ -36,15 +37,45 @@ struct LocationMenuView: View {
     }
     
     private func makeItem(_ item: LocationViewModel) -> some View {
+        MenuRowItemView(viewModel: item, didTapItem: { viewModel in
+            selectedItem = viewModel
+        }, didTapFavorite: { viewModel in
+            toggleSelectedItem(viewModel)
+        })
+        .background(
+            selectedItem == item
+            ? Color.yellow.opacity(0.6)
+            : Color.clear
+        )
+    }
+}
+
+struct MenuRowItemView: View {
+    @ObservedObject
+    var viewModel: LocationViewModel
+    var didTapItem: (LocationViewModel) -> Void
+    var didTapFavorite: (LocationViewModel) -> Void
+    
+    var body: some View {
         HStack {
-            Text(item.menuTitle)
-                .padding()
-                .cornerRadius(8)
-                .onTapGesture {
-                    selectedItem = item
+                Text(viewModel.menuTitle)
+                    .padding()
+                    .cornerRadius(8)
+                    .onTapGesture {
+                        didTapItem(viewModel)
+                    }
+                
+                Spacer()
+                
+                Button(action: {
+                    didTapFavorite(viewModel)
+                }) {
+                    Image(systemName: viewModel.isFavorite ? "star.fill" : "star")
+                        .foregroundColor(viewModel.isFavorite ? .yellow : .gray)
                 }
+                .buttonStyle(.plain)
+                .padding(.trailing, 8)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(selectedItem == item ? Color.yellow.opacity(0.6) : Color.clear)
+        .frame(maxWidth: .infinity)
     }
 }

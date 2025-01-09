@@ -19,6 +19,8 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
     
     @Published
     var locationState: LocationState
+    @Published
+    var isFavorite: Bool
     let index: Int
     let name: String
     let country: String
@@ -51,6 +53,7 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
         country: String,
         latitude: Double,
         longitude: Double,
+        isFavorite: Bool,
         domainDependencies: DomainDependencies
     ) {
         self.index = index
@@ -58,8 +61,25 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
         self.country = country
         self.latitude = latitude
         self.longitude = longitude
-        locationState = .loading
+        self.isFavorite = isFavorite
+        self.locationState = .loading
         self.domainDependencies = domainDependencies
+    }
+    
+    convenience init(
+        index: Int,
+        place: PlaceModel,
+        domainDependencies: DomainDependencies
+    ) {        
+        self.init(
+            index: index,
+            name: place.name,
+            country: place.country,
+            latitude: place.coordinate.lat,
+            longitude: place.coordinate.lat,
+            isFavorite: place.isFavorite,
+            domainDependencies: domainDependencies
+        )
     }
 
     func validateLocation() async {

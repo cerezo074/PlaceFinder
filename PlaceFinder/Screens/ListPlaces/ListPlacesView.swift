@@ -152,8 +152,14 @@ struct ListPlacesView: View {
             searchText: $viewModel.searchText,
             placeholder: viewModel.searchPlaceholder,
             isLoading: viewModel.isLoadingSearchResults,
-            items: countries
+            items: countries,
+            toggleSelectedItem: { [weak viewModel] locationViewModel in
+                guard let viewModel else { return }
+                
+                Task {
+                    await viewModel.toggleFavorite(on: locationViewModel)
+                }
+            }
         )
     }
-    
 }

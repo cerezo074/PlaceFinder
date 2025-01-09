@@ -25,6 +25,7 @@ class ListPlacesViewModel: ObservableObject {
     @Published
     var isLoadingSearchResults: Bool
     let searchPlaceholder: String
+    private var locations: [LocationViewModel]
     private var didLoadView: Bool
     private var subscriptions: Set<AnyCancellable>
     private let placesProvider: PlacesServices
@@ -42,6 +43,7 @@ class ListPlacesViewModel: ObservableObject {
         self.subscriptions = []
         self.didLoadView = false
         self.isLoadingSearchResults = false
+        self.locations = []
     }
     
     func viewDidAppear() async {
@@ -61,6 +63,22 @@ class ListPlacesViewModel: ObservableObject {
         await fetchPlaces()
     }
     
+    func toggleFavorite(on locationViewModel: LocationViewModel) async {
+        var model = PlaceModel(from: locationViewModel)
+        model.isFavorite.toggle()
+        
+        do {
+            try placesProvider.update(place: model)
+            
+            await callOnMainThread { [weak locationViewModel] in
+                locationViewModel?.isFavorite.toggle()
+            }
+        } catch {
+            // TODO: Show visual feedback to the user.
+            print("Error updating place: \(error)")
+        }
+    }
+    
     private func listenToSearchTextChanges() {
         $searchText
             .dropFirst()
@@ -78,16 +96,16 @@ class ListPlacesViewModel: ObservableObject {
         }
         
         do {
-            let countries = try await placesProvider.getAllPlaces().enumerated().map { (index, value) in
+            let countries = try await placesProvider.getAllPlaces()
+                .enumerated()
+                .map { (index, value) in
                 LocationViewModel(
                     index: index,
-                    name: value.name,
-                    country: value.country,
-                    latitude: value.coordinate.lat,
-                    longitude: value.coordinate.lon,
+                    place: value,
                     domainDependencies: placesValidator
                 )
             }
+            self.locations = countries
             
             await callOnMainThread { [weak self] in
                 self?.listViewState = .showCountries(locations: countries)
@@ -112,10 +130,7 @@ class ListPlacesViewModel: ObservableObject {
                     .map { index, value in
                         LocationViewModel(
                             index: index,
-                            name: value.name,
-                            country: value.country,
-                            latitude: value.coordinate.lat,
-                            longitude: value.coordinate.lon,
+                            place: value,
                             domainDependencies: placesValidator
                         )
                     }
