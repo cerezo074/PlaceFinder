@@ -14,6 +14,8 @@ protocol ListPlacesDataProvider {
 protocol ListPlacesDataServices: AnyObject {
     func loadAllPlaces() async
     func fetchAllPlaces() async throws -> [PlaceModel]
+    func update(place: PlaceModel) throws
+    func getFavoritesPlaces(by prefix: String) -> [PlaceModel]
 }
 
 class ListPlacesRepository: ListPlacesDataServices {
@@ -32,7 +34,7 @@ class ListPlacesRepository: ListPlacesDataServices {
     
     func loadAllPlaces() async {
         do {
-            inMemoryPlaces = try await loadFromLocalSource()
+            inMemoryPlaces = try loadFromLocalSource()
             
             if !inMemoryPlaces.isEmpty {
                 return
@@ -59,9 +61,30 @@ class ListPlacesRepository: ListPlacesDataServices {
         return placesDTO.map { PlaceModel(from: $0) }
     }
     
-    private func loadFromLocalSource() async throws -> [PlaceModel] {
+    func update(place: PlaceModel) throws {
+        let entity = PlaceEntity(from: place)
+        try placesDB.update(entity)
+        
+        // TODO: Update the trie if the place is favorite or not insert/remove it.
+        
+        if let placeIndex = inMemoryPlaces.firstIndex(where: { $0.id == place.id }) {
+            inMemoryPlaces[placeIndex] = place
+        }
+    }
+    
+    func getFavoritesPlaces(by prefix: String) -> [PlaceModel] {
+        if prefix.isEmpty {
+            return inMemoryPlaces
+        }
+        
+        // TODO: Call trie and get all elements by the prefix string
+        
+        return []
+    }
+    
+    private func loadFromLocalSource() throws -> [PlaceModel] {
         // TODO: We gotta read it by batches and not all at once like with a pagination
-        return try await placesDB.read(
+        return try placesDB.read(
             sortBy: SortDescriptor<PlaceEntity>(\.name), SortDescriptor<PlaceEntity>(\.country)
         )
         .map { PlaceModel(from: $0) }

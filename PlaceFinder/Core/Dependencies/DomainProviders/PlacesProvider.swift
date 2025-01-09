@@ -14,6 +14,8 @@ protocol PlacesProvider {
 protocol PlacesServices {
     func loadData() async
     func getAllPlaces() async throws -> [PlaceModel]
+    func update(place: PlaceModel) throws
+    func filterPlaces(by prefix: String) throws -> [PlaceModel]
 }
 
 class PlacesController: PlacesServices, PlaceValidatorServices {
@@ -38,5 +40,13 @@ class PlacesController: PlacesServices, PlaceValidatorServices {
     
     func isLocationValid(lat: Double, lng: Double) async throws {
         try await validator.isLocationValid(lat: lat, lng: lng)
+    }
+    
+    func update(place: PlaceModel) throws {
+        try repository.update(place: place)
+    }
+    
+    func filterPlaces(by prefix: String) throws -> [PlaceModel] {
+        repository.getFavoritesPlaces(by: prefix)
     }
 }

@@ -10,6 +10,14 @@ struct EmptyFactory {
     static let emptyListPlaces: PlacesServices = EmptyFactory.EmptyListPlaces()
     
     struct EmptyListPlaces: PlacesServices {
+        func filterPlaces(by prefix: String) throws -> [PlaceModel] {
+            []
+        }
+        
+        func update(place: PlaceModel) throws {
+            
+        }
+        
         func loadData() async {
             
         }

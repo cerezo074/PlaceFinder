@@ -58,7 +58,7 @@ class ListPlacesViewModel: ObservableObject {
             .removeDuplicates()
             .debounce(for: .seconds(3), scheduler: DispatchQueue.main)
             .sink { [weak self] searchText in
-                self?.applyFilter(with: searchText)
+                self?.applyFilter(with: searchText.lowercased())
             }
             .store(in: &subscriptions)
     }
@@ -84,6 +84,7 @@ class ListPlacesViewModel: ObservableObject {
                 self?.listViewState = .showCountries(locations: countries)
             }
         } catch {
+            print("error: \(error.localizedDescription)")
             await callOnMainThread { [weak self] in
                 self?.listViewState = .retry
             }
@@ -96,7 +97,29 @@ class ListPlacesViewModel: ObservableObject {
                 self?.isLoadingSearchResults = true
             }
             
-            try? await Task.sleep(for: .milliseconds(5000))
+            do {
+                let favoriteLocations = try placesProvider.filterPlaces(by: text)
+                    .enumerated()
+                    .map { index, value in
+                        LocationViewModel(
+                            index: index,
+                            name: value.name,
+                            country: value.country,
+                            latitude: value.coordinate.lat,
+                            longitude: value.coordinate.lon,
+                            domainDependencies: placesValidator
+                        )
+                    }
+                
+                await callOnMainThread { [weak self] in
+                    self?.listViewState = .showCountries(locations: favoriteLocations)
+                }
+            } catch {
+                print("error: \(error.localizedDescription)")
+                await callOnMainThread { [weak self] in
+                    self?.listViewState = .retry
+                }
+            }
             
             await callOnMainThread { [weak self] in
                 self?.isLoadingSearchResults = false

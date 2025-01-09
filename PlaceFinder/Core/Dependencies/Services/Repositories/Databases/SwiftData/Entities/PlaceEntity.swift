@@ -43,4 +43,14 @@ final class PlaceEntity {
             isFavorite: false
         )
     }
+    
+    convenience init(from model: PlaceModel) {
+        self.init(
+            country: model.country,
+            name: model.name,
+            lon: model.coordinate.lon,
+            lat: model.coordinate.lat,
+            isFavorite: model.isFavorite
+        )
+    }
 }
