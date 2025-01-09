@@ -1,5 +1,5 @@
 //
-//  ListPlacesProvider.swift
+//  PlacesProvider.swift
 //  PlaceFinder
 //
 //  Created by Eli Pacheco Hoyos on 30/12/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ListPlacesProvider {
+protocol PlacesProvider {
     var placesProvider: PlacesServices { get }
 }
 

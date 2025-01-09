@@ -30,7 +30,7 @@ struct ListPlacesView: View {
     }
 
     var body: some View {
-        switch viewModel.viewState {
+        switch viewModel.listViewState {
         case .loading:
             ProgressView("Loading...")
                 .task {
@@ -41,6 +41,7 @@ struct ListPlacesView: View {
         case .showCountries(let list):
             displayCountries(with: list)
                 .detectLandscape($isLandscape)
+                .disabled(viewModel.isLoadingSearchResults)
         }
     }
     
@@ -71,20 +72,14 @@ struct ListPlacesView: View {
         ZStack {
             if isLandscape {
                 HStack {
-                    LocationMenuView(
-                        selectedItem: $viewModel.selectedItem,
-                        items: countries
-                    )
+                    makeMenuView(with: countries)
                     .frame(maxWidth: 300)
                     .background(Color(UIColor.systemGroupedBackground))
                     landscapeMapView
                 }
                 .navigationTitle("Master-Detail")
             } else {
-                LocationMenuView(
-                    selectedItem: $viewModel.selectedItem,
-                    items: countries
-                )
+                makeMenuView(with: countries)
                 .onReceive(viewModel.$selectedItem) { selectedItem in
                     guard let selectedItem else { return }
                     appCoordinator.baseNavigationPath.append(selectedItem)
@@ -102,6 +97,16 @@ struct ListPlacesView: View {
                 appCoordinator.baseNavigationPath.removeLast()
             }
         }
+    }
+    
+    private func makeMenuView(with countries: [LocationViewModel]) -> some View {
+        LocationMenuView(
+            selectedItem: $viewModel.selectedItem,
+            searchText: $viewModel.searchText,
+            placeholder: viewModel.searchPlaceholder,
+            isLoading: viewModel.isLoadingSearchResults,
+            items: countries
+        )
     }
     
     @ViewBuilder

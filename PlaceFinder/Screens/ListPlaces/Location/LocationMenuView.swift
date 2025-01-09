@@ -8,18 +8,30 @@
 import SwiftUI
 
 struct LocationMenuView: View {
-    @Binding var selectedItem: LocationViewModel?
+    @Binding
+    var selectedItem: LocationViewModel?
+    @Binding
+    var searchText: String
+    let placeholder: String
+    let isLoading: Bool
     let items: [LocationViewModel]
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            LazyVStack(alignment: .leading) {
-                ForEach(items, id: \.self) {
-                    makeItem($0)
+        VStack {
+            SearchBar(
+                text: $searchText,
+                isLoading: isLoading,
+                placeholder: placeholder
+            )
+            ScrollView(showsIndicators: false) {
+                LazyVStack(alignment: .leading) {
+                    ForEach(items, id: \.self) {
+                        makeItem($0)
+                    }
                 }
+                .padding()
+                .background(.green)
             }
-            .padding()
-            .background(.green)
         }
     }
     

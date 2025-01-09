@@ -5,12 +5,10 @@
 //  Created by Eli Pacheco Hoyos on 30/12/24.
 //
 
-typealias AppDomains = ListPlacesProvider &
+typealias AppDomains = PlacesProvider &
                        PlaceValidatorProvider
 
 class PlaceFinderDomains: AppDomains {
-    private let placesController: PlacesServices & PlaceValidatorServices
-    
     var placesProvider: PlacesServices {
         placesController
     }
@@ -18,6 +16,8 @@ class PlaceFinderDomains: AppDomains {
     var placeValidatorProvider: PlaceValidatorServices {
         placesController
     }
+    
+    private let placesController: PlacesServices & PlaceValidatorServices
     
     init(appServices: AppServices) {
         let repository = ListPlacesRepository.init(
