@@ -7,6 +7,8 @@
 
 import Foundation
 
+// For more information, https://github.com/kodecocodes/swift-algorithm-club/blob/master/Trie/Trie/Trie/Trie.swift
+
 /// A node in the trie
 class TrieNode<T: Hashable> {
     weak var parentNode: TrieNode?

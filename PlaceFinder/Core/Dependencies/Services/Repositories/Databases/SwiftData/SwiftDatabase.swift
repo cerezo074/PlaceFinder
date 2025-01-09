@@ -40,11 +40,12 @@ extension SwiftDatabase {
         try context.save()
     }
     
-    func read<T: PersistentModel>(sortBy sortDescriptors: SortDescriptor<T>...) throws -> [T] {
+    func read<T: PersistentModel>(sortBy sortDescriptors: [SortDescriptor<T>]) throws -> [T] {
         let context = ModelContext(container)
         let fetchDescriptor = FetchDescriptor<T>(
             sortBy: sortDescriptors
         )
+        
         return try context.fetch(fetchDescriptor)
     }
     

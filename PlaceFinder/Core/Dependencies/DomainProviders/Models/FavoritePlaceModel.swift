@@ -5,14 +5,10 @@
 //  Created by Eli Pacheco Hoyos on 9/01/25.
 //
 
-struct FavoritePlaceModel: Hashable {
+struct FavoritePlaceModel: Hashable, ModelIDs {
     let country: String
     let name: String
     let coordinate: CoordinateModel
-    
-    var uniqueID: String {
-        "\(name),\(country),\(coordinate.latitude),\(coordinate.longitude)".lowercased()
-    }
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(uniqueID)

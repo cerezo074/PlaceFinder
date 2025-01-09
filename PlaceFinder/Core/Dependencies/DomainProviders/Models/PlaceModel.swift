@@ -5,19 +5,11 @@
 //  Created by Eli Pacheco Hoyos on 31/12/24.
 //
 
-struct PlaceModel: Codable, Hashable {
+struct PlaceModel: Codable, Hashable, ModelIDs {
     let country: String
     let name: String
     let coordinate: CoordinateModel
     var isFavorite: Bool
-    
-    var uniqueID: String {
-        "\(sortID),\(coordinate.latitude),\(coordinate.longitude)".lowercased()
-    }
-    
-    var sortID: String {
-        "\(name),\(country)".lowercased()
-    }
     
     init(
         country: String,

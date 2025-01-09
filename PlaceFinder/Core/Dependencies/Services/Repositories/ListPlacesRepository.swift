@@ -75,7 +75,7 @@ class ListPlacesRepository: ListPlacesDataServices {
         }
         
         let inMemoryIndex = inMemoryPlaces.firstIndex { $0.uniqueID == place.uniqueID }
-
+        
         if let index = inMemoryIndex {
             inMemoryPlaces[index] = place
         }
@@ -98,7 +98,7 @@ class ListPlacesRepository: ListPlacesDataServices {
     
     private func loadFavorites() throws {
         let favoritePlaces = try placesDB.read(
-            sortBy: SortDescriptor<PlaceEntity>(\.name), SortDescriptor<PlaceEntity>(\.country)
+            sortBy: [SortDescriptor<PlaceEntity>(\.name), SortDescriptor<PlaceEntity>(\.country)]
         )
         .map { FavoritePlaceModel(from: $0) }
         
@@ -107,7 +107,7 @@ class ListPlacesRepository: ListPlacesDataServices {
         for favoriteModel in favoritesContainer {
             favoritesTrie.insert(word: favoriteModel.uniqueID)
         }
-                
+        
         self.favoritesContainer = favoritesContainer
     }
     
@@ -125,7 +125,7 @@ class ListPlacesRepository: ListPlacesDataServices {
             placeModel.isFavorite = favoritesContainer.contains(favoriteModel)
             placeModels.append(placeModel)
         }
-                
+        
         self.inMemoryPlaces = placeModels.sorted { leftModel, rightModel in
             leftModel.sortID < rightModel.sortID
         }
