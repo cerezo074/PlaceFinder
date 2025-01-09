@@ -12,11 +12,11 @@ struct PlaceModel: Codable, Hashable {
     var isFavorite: Bool
     
     var uniqueID: String {
-        "\(sortID),\(coordinate.latitude),\(coordinate.longitude)"
+        "\(sortID),\(coordinate.latitude),\(coordinate.longitude)".lowercased()
     }
     
     var sortID: String {
-        "\(name),\(country)"
+        "\(name),\(country)".lowercased()
     }
     
     init(
@@ -56,5 +56,12 @@ struct PlaceModel: Codable, Hashable {
             longitude: locationViewModel.longitude
         )
         self.isFavorite = locationViewModel.isFavorite
+    }
+    
+    init(from favoriteModel: FavoritePlaceModel) {
+        self.country = favoriteModel.country
+        self.name = favoriteModel.name
+        self.coordinate = favoriteModel.coordinate
+        self.isFavorite = true
     }
 }

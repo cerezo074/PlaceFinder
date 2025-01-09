@@ -11,7 +11,7 @@ struct FavoritePlaceModel: Hashable {
     let coordinate: CoordinateModel
     
     var uniqueID: String {
-        "\(name),\(country),\(coordinate.latitude),\(coordinate.longitude)"
+        "\(name),\(country),\(coordinate.latitude),\(coordinate.longitude)".lowercased()
     }
     
     func hash(into hasher: inout Hasher) {
@@ -35,5 +35,19 @@ struct FavoritePlaceModel: Hashable {
         self.country = placeModel.country
         self.name = placeModel.name
         self.coordinate = placeModel.coordinate
+    }
+    
+    init?(from uniqueID: String) {
+        let components = uniqueID.split(separator: ",")
+        
+        guard components.count == 4,
+              let latitude = Double(components[2]),
+              let longitude = Double(components[3]) else {
+            return nil
+        }
+        
+        self.name = String(components[0])
+        self.country = String(components[1])
+        self.coordinate = CoordinateModel(latitude: latitude, longitude: longitude)
     }
 }

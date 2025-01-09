@@ -22,7 +22,8 @@ class ListPlacesRepository: ListPlacesDataServices {
     private let networkServices: NetworkServices
     private let placesDB: any Database<PlaceEntity>
     private var inMemoryPlaces: [PlaceModel]
-    private var favorites: Set<FavoritePlaceModel>
+    private var favoritesContainer: Set<FavoritePlaceModel>
+    private var favoritesTrie: Trie
     
     init(
         networkServices: NetworkServices,
@@ -31,7 +32,8 @@ class ListPlacesRepository: ListPlacesDataServices {
         self.placesDB = placesDB
         self.networkServices = networkServices
         inMemoryPlaces = []
-        favorites = []
+        favoritesContainer = []
+        favoritesTrie = Trie()
     }
     
     func loadAllPlaces() async {
@@ -61,24 +63,37 @@ class ListPlacesRepository: ListPlacesDataServices {
     func update(place: PlaceModel) throws {
         let entity = PlaceEntity(from: place)
         let favoritePlace = FavoritePlaceModel(from: place)
-
-        if place.isFavorite, !favorites.contains(favoritePlace) {
+        
+        if place.isFavorite, !favoritesContainer.contains(favoritePlace) {
             try placesDB.update(entity)
-            favorites.insert(favoritePlace)
+            favoritesContainer.insert(favoritePlace)
+            favoritesTrie.insert(word: favoritePlace.uniqueID)
         } else {
             try placesDB.delete(entity)
-            favorites.remove(favoritePlace)
+            favoritesTrie.remove(word: favoritePlace.uniqueID)
+            favoritesContainer.remove(favoritePlace)
+        }
+        
+        let inMemoryIndex = inMemoryPlaces.firstIndex { $0.uniqueID == place.uniqueID }
+
+        if let index = inMemoryIndex {
+            inMemoryPlaces[index] = place
         }
     }
     
-    func getFavoritesPlaces(by prefix: String) -> [PlaceModel] {
-        if prefix.isEmpty {
+    func getFavoritesPlaces(by word: String) -> [PlaceModel] {
+        if word.isEmpty {
             return inMemoryPlaces
         }
         
-        // TODO: Call trie and get all elements by the prefix string
+        let prefixResults: [FavoritePlaceModel] = favoritesTrie.findWordsWithPrefix(prefix: word)
+            .compactMap { uniqueID in
+                FavoritePlaceModel(from: uniqueID)
+            }
+        let targetResults: Set<FavoritePlaceModel> = Set(prefixResults)
         
-        return []
+        return favoritesContainer.intersection(targetResults)
+            .map { PlaceModel(from: $0) }
     }
     
     private func loadFavorites() throws {
@@ -87,7 +102,13 @@ class ListPlacesRepository: ListPlacesDataServices {
         )
         .map { FavoritePlaceModel(from: $0) }
         
-        self.favorites = Set(favoritePlaces)
+        let favoritesContainer = Set(favoritePlaces)
+        
+        for favoriteModel in favoritesContainer {
+            favoritesTrie.insert(word: favoriteModel.uniqueID)
+        }
+                
+        self.favoritesContainer = favoritesContainer
     }
     
     private func loadFromRemoteSource() async throws {
@@ -101,7 +122,7 @@ class ListPlacesRepository: ListPlacesDataServices {
         for placeDTO in placesDTO {
             var placeModel = PlaceModel(from: placeDTO)
             let favoriteModel = FavoritePlaceModel(from: placeModel)
-            placeModel.isFavorite = favorites.contains(favoriteModel)
+            placeModel.isFavorite = favoritesContainer.contains(favoriteModel)
             placeModels.append(placeModel)
         }
                 
