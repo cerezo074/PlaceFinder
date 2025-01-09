@@ -14,12 +14,16 @@ protocol ListPlacesDataProvider {
 protocol ListPlacesDataServices: AnyObject {
     func loadAllPlaces() async
     func fetchAllPlaces() async throws -> [PlaceModel]
+    func update(place: PlaceModel) throws
+    func getFavoritesPlaces(by prefix: String) -> [PlaceModel]
 }
 
 class ListPlacesRepository: ListPlacesDataServices {
     private let networkServices: NetworkServices
     private let placesDB: any Database<PlaceEntity>
     private var inMemoryPlaces: [PlaceModel]
+    private var favoritesContainer: Set<FavoritePlaceModel>
+    private var favoritesTrie: Trie
     
     init(
         networkServices: NetworkServices,
@@ -28,16 +32,13 @@ class ListPlacesRepository: ListPlacesDataServices {
         self.placesDB = placesDB
         self.networkServices = networkServices
         inMemoryPlaces = []
+        favoritesContainer = []
+        favoritesTrie = Trie()
     }
     
     func loadAllPlaces() async {
         do {
-            inMemoryPlaces = try await loadFromLocalSource()
-            
-            if !inMemoryPlaces.isEmpty {
-                return
-            }
-            
+            try loadFavorites()
             try await loadFromRemoteSource()
         } catch {
             print("Error: \(error)")
@@ -59,12 +60,55 @@ class ListPlacesRepository: ListPlacesDataServices {
         return placesDTO.map { PlaceModel(from: $0) }
     }
     
-    private func loadFromLocalSource() async throws -> [PlaceModel] {
-        // TODO: We gotta read it by batches and not all at once like with a pagination
-        return try await placesDB.read(
-            sortBy: SortDescriptor<PlaceEntity>(\.name), SortDescriptor<PlaceEntity>(\.country)
+    func update(place: PlaceModel) throws {
+        let entity = PlaceEntity(from: place)
+        let favoritePlace = FavoritePlaceModel(from: place)
+        
+        if place.isFavorite, !favoritesContainer.contains(favoritePlace) {
+            try placesDB.update(entity)
+            favoritesContainer.insert(favoritePlace)
+            favoritesTrie.insert(word: favoritePlace.uniqueID)
+        } else {
+            try placesDB.delete(entity)
+            favoritesTrie.remove(word: favoritePlace.uniqueID)
+            favoritesContainer.remove(favoritePlace)
+        }
+        
+        let inMemoryIndex = inMemoryPlaces.firstIndex { $0.uniqueID == place.uniqueID }
+        
+        if let index = inMemoryIndex {
+            inMemoryPlaces[index] = place
+        }
+    }
+    
+    func getFavoritesPlaces(by word: String) -> [PlaceModel] {
+        if word.isEmpty {
+            return inMemoryPlaces
+        }
+        
+        let prefixResults: [FavoritePlaceModel] = favoritesTrie.findWordsWithPrefix(prefix: word)
+            .compactMap { uniqueID in
+                FavoritePlaceModel(from: uniqueID)
+            }
+        let targetResults: Set<FavoritePlaceModel> = Set(prefixResults)
+        
+        return favoritesContainer.intersection(targetResults)
+            .map { PlaceModel(from: $0) }
+    }
+    
+    private func loadFavorites() throws {
+        let favoritePlaces = try placesDB.read(
+            sortBy: [SortDescriptor<PlaceEntity>(\.name), SortDescriptor<PlaceEntity>(\.country)]
         )
-        .map { PlaceModel(from: $0) }
+        .map { FavoritePlaceModel(from: $0) }
+        
+        let favoritesContainer = Set(favoritePlaces)
+        
+        for favoriteModel in favoritesContainer {
+            favoritesTrie.insert(word: favoriteModel.uniqueID)
+        }
+        
+        self.favoritesContainer = favoritesContainer
     }
     
     private func loadFromRemoteSource() async throws {
@@ -73,25 +117,18 @@ class ListPlacesRepository: ListPlacesDataServices {
             with: PlaceEndpointTypes.fetchAll
         ) ?? []
         
+        var placeModels: [PlaceModel] = []
         
-        // This is done in parallel, there is not need to make users wait for this
-        Task {
-            // Removes possible duplicates
-            let placesDTOSet = Set(placesDTO)
-            let placesEntities = placesDTOSet.map { PlaceEntity(from: $0) }
-            do {
-                try placesDB.create(placesEntities)
-            } catch {
-                print("Error saving places entities to database: \(error)")
-            }
+        for placeDTO in placesDTO {
+            var placeModel = PlaceModel(from: placeDTO)
+            let favoriteModel = FavoritePlaceModel(from: placeModel)
+            placeModel.isFavorite = favoritesContainer.contains(favoriteModel)
+            placeModels.append(placeModel)
         }
         
-        inMemoryPlaces = placesDTO
-            .map { PlaceModel(from: $0) }
-            .sorted { leftModel, rightModel in
-                leftModel.name < rightModel.name && leftModel.country < rightModel.country
-            }
+        self.inMemoryPlaces = placeModels.sorted { leftModel, rightModel in
+            leftModel.sortID < rightModel.sortID
+        }
     }
-    
 }
 

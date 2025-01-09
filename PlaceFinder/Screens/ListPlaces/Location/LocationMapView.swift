@@ -40,7 +40,7 @@ struct LocationMapView: View {
                         coordinate: viewModel.locationCoordinate
                     )
                 }
-                .onAppear {
+                .task {
                     centerMap(on: viewModel.locationCoordinate)
                 }
             case .failure(let errorMsg):

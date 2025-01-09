@@ -30,7 +30,7 @@ struct ListPlacesView: View {
     }
 
     var body: some View {
-        switch viewModel.viewState {
+        switch viewModel.listViewState {
         case .loading:
             ProgressView("Loading...")
                 .task {
@@ -41,6 +41,7 @@ struct ListPlacesView: View {
         case .showCountries(let list):
             displayCountries(with: list)
                 .detectLandscape($isLandscape)
+                .disabled(viewModel.isLoadingSearchResults)
         }
     }
     
@@ -63,28 +64,60 @@ struct ListPlacesView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-            
         }
     }
     
-    private func displayCountries(with countries: [LocationViewModel]) -> some View {
+    private var emptyCountriesView: some View {
+        VStack {
+            Text("Sorry there are no countries matching your search")
+                .fontWeight(.semibold)
+                .font(.headline)
+                .padding(.bottom, 20)
+                .multilineTextAlignment(.center)
+            Button {
+                Task {
+                    await viewModel.reloadContent()
+                }
+            } label: {
+                Text("Tap to reset")
+                    .font(.callout)
+                    .padding()
+                    .background(.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var landscapeMapView: some View {
+        if let selectedItem = viewModel.selectedItem {
+            LocationMapView(
+                selectedItem: selectedItem,
+                backButtonAction: nil
+            )
+            .frame(maxWidth: .infinity)
+            .background(Color(UIColor.systemBackground))
+        } else {
+            Text("Select an item from the list")
+                .font(.title)
+                .foregroundColor(.gray)
+                .padding()
+        }
+    }
+    
+    private func makeDefaultCountriesView(with countries: [LocationViewModel]) -> some View {
         ZStack {
             if isLandscape {
                 HStack {
-                    LocationMenuView(
-                        selectedItem: $viewModel.selectedItem,
-                        items: countries
-                    )
+                    makeMenuView(with: countries)
                     .frame(maxWidth: 300)
                     .background(Color(UIColor.systemGroupedBackground))
                     landscapeMapView
                 }
                 .navigationTitle("Master-Detail")
             } else {
-                LocationMenuView(
-                    selectedItem: $viewModel.selectedItem,
-                    items: countries
-                )
+                makeMenuView(with: countries)
                 .onReceive(viewModel.$selectedItem) { selectedItem in
                     guard let selectedItem else { return }
                     appCoordinator.baseNavigationPath.append(selectedItem)
@@ -105,19 +138,28 @@ struct ListPlacesView: View {
     }
     
     @ViewBuilder
-    private var landscapeMapView: some View {
-        if let selectedItem = viewModel.selectedItem {
-            LocationMapView(
-                selectedItem: selectedItem,
-                backButtonAction: nil
-            )
-            .frame(maxWidth: .infinity)
-            .background(Color(UIColor.systemBackground))
+    private func displayCountries(with countries: [LocationViewModel]) -> some View {
+        if countries.isEmpty {
+            emptyCountriesView
         } else {
-            Text("Select an item from the list")
-                .font(.title)
-                .foregroundColor(.gray)
-                .padding()
+            makeDefaultCountriesView(with: countries)
         }
+    }
+    
+    private func makeMenuView(with countries: [LocationViewModel]) -> some View {
+        LocationMenuView(
+            selectedItem: $viewModel.selectedItem,
+            searchText: $viewModel.searchText,
+            placeholder: viewModel.searchPlaceholder,
+            isLoading: viewModel.isLoadingSearchResults,
+            items: countries,
+            toggleSelectedItem: { [weak viewModel] locationViewModel in
+                guard let viewModel else { return }
+                
+                Task {
+                    await viewModel.toggleFavorite(on: locationViewModel)
+                }
+            }
+        )
     }
 }

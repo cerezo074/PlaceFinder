@@ -1,5 +1,5 @@
 //
-//  ListPlacesProvider.swift
+//  PlacesProvider.swift
 //  PlaceFinder
 //
 //  Created by Eli Pacheco Hoyos on 30/12/24.
@@ -7,13 +7,15 @@
 
 import Foundation
 
-protocol ListPlacesProvider {
+protocol PlacesProvider {
     var placesProvider: PlacesServices { get }
 }
 
 protocol PlacesServices {
     func loadData() async
     func getAllPlaces() async throws -> [PlaceModel]
+    func update(place: PlaceModel) throws
+    func filterPlaces(by prefix: String) throws -> [PlaceModel]
 }
 
 class PlacesController: PlacesServices, PlaceValidatorServices {
@@ -36,7 +38,15 @@ class PlacesController: PlacesServices, PlaceValidatorServices {
         try await repository.fetchAllPlaces()
     }
     
-    func isLocationValid(lat: Double, lng: Double) async throws {
-        try await validator.isLocationValid(lat: lat, lng: lng)
+    func isLocationValid(latitude: Double, longitude: Double) async throws {
+        try await validator.isLocationValid(latitude: latitude, longitude: longitude)
+    }
+    
+    func update(place: PlaceModel) throws {
+        try repository.update(place: place)
+    }
+    
+    func filterPlaces(by prefix: String) throws -> [PlaceModel] {
+        repository.getFavoritesPlaces(by: prefix)
     }
 }

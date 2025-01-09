@@ -26,6 +26,11 @@ struct PlaceDTO: Decodable, Hashable {
 }
 
 struct CoordinateDTO: Codable, Hashable {
-    let lon: Double
-    let lat: Double
+    let latitude: Double
+    let longitude: Double
+    
+    enum CodingKeys: String, CodingKey {
+        case latitude = "lat"
+        case longitude = "lon"
+    }
 }

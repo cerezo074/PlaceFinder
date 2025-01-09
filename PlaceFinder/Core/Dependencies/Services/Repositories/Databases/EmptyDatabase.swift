@@ -24,8 +24,8 @@ class EmptyDatabase: Database {
     }
     
     func read(
-        sortBy sortDescriptors: SortDescriptor<PlaceEntity>...
-    ) async throws -> [PlaceEntity] {
+        sortBy sortDescriptors: [SortDescriptor<PlaceEntity>]
+    ) throws -> [PlaceEntity] {
         return []
     }
     
