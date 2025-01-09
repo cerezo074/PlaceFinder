@@ -13,16 +13,16 @@ PlaceFinder is a SwiftUI-based app designed to help users browse and explore cit
 
 ### City Details
 - Display each city with:
-  - City and country code as the title.
-  - Coordinates (longitude and latitude) as subtitles.
-  - A toggle to mark the city as a favorite.
+- City and country code as the title.
+- Coordinates (longitude and latitude) as subtitles.
+- A toggle to mark the city as a favorite.
 - Provide a button to navigate to an information screen about the selected city.
 - Tap on a city to navigate its location on the map.
 
 ### Dynamic UI
 - Adapt UI layout based on device orientation:
-  - Use separate screens for the list and map in portrait mode.
-  - Display both the master (list) and detail (map) views simultaneously in landscape mode or on larger screens.
+- Use separate screens for the list and map in portrait mode.
+- Display both the master (list) and detail (map) views simultaneously in landscape mode or on larger screens.
 
 ### Favorites Management
 - Allow users to mark cities as favorites.
@@ -40,7 +40,7 @@ PlaceFinder is a SwiftUI-based app designed to help users browse and explore cit
 
 ### Core Technologies
 - **SwiftUI**: For building the user interface.
-- **SwiftData**: For storing city data offline and persisting favorite cities.
+- **SwiftData**: For persisting favorite cities.
 - **MapKit**: For displaying city locations on a map.
 - **Combine**: For managing state and implementing debounce functionality for search input.
 - **NavigationSplitView**: For adaptive navigation, displaying master and detail views simultaneously in landscape mode or on larger screens. Not currently used, but i will compare this with a manual approach.
