@@ -34,12 +34,6 @@ class ListPlacesRepository: ListPlacesDataServices {
     
     func loadAllPlaces() async {
         do {
-            inMemoryPlaces = try loadFromLocalSource()
-            
-            if !inMemoryPlaces.isEmpty {
-                return
-            }
-            
             try await loadFromRemoteSource()
         } catch {
             print("Error: \(error)")
@@ -96,24 +90,11 @@ class ListPlacesRepository: ListPlacesDataServices {
             with: PlaceEndpointTypes.fetchAll
         ) ?? []
         
+        let placeModels = placesDTO.map { PlaceModel(from: $0) }
         
-        // This is done in parallel, there is not need to make users wait for this
-        Task {
-            // Removes possible duplicates
-            let placesDTOSet = Set(placesDTO)
-            let placesEntities = placesDTOSet.map { PlaceEntity(from: $0) }
-            do {
-                try placesDB.create(placesEntities)
-            } catch {
-                print("Error saving places entities to database: \(error)")
-            }
+        self.inMemoryPlaces = placeModels.sorted { leftModel, rightModel in
+            leftModel.sortID < rightModel.sortID
         }
-        
-        inMemoryPlaces = placesDTO
-            .map { PlaceModel(from: $0) }
-            .sorted { leftModel, rightModel in
-                leftModel.name < rightModel.name && leftModel.country < rightModel.country
-            }
     }
     
 }

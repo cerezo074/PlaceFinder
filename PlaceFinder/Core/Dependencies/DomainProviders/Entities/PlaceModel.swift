@@ -15,8 +15,8 @@ struct PlaceModel: Codable, Hashable {
         "\(country),\(name),\(coordinate.latitude),\(coordinate.longitude)"
     }
     
-    var prefixSearch: String {
-        "\(name), \(country)".lowercased()
+    var sortID: String {
+        "\(name), \(country)"
     }
     
     init(
