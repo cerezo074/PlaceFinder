@@ -60,10 +60,13 @@ class Trie: NSObject, NSCoding {
     fileprivate let root: Node
     fileprivate var wordCount: Int
     
+    let useCaseSensitive: Bool
+    
     /// Creates an empty trie.
-    override init() {
+    init(allowCaseSensitive: Bool = true) {
         root = Node()
         wordCount = 0
+        useCaseSensitive = allowCaseSensitive
         super.init()
     }
     
@@ -99,8 +102,11 @@ extension Trie {
         guard !word.isEmpty else {
             return
         }
+        
         var currentNode = root
-        for character in word.lowercased() {
+        let collection = useCaseSensitive ? word : word.lowercased()
+        
+        for character in collection {
             if let childNode = currentNode.children[character] {
                 currentNode = childNode
             } else {
@@ -112,6 +118,7 @@ extension Trie {
         guard !currentNode.isTerminating else {
             return
         }
+        
         wordCount += 1
         currentNode.isTerminating = true
     }
@@ -127,13 +134,17 @@ extension Trie {
         guard !word.isEmpty else {
             return false
         }
+        
         var currentNode = root
-        for character in word.lowercased() {
+        let collection = useCaseSensitive ? word : word.lowercased()
+        
+        for character in collection {
             guard let childNode = currentNode.children[character] else {
                 return false
             }
             currentNode = childNode
         }
+        
         return matchPrefix || currentNode.isTerminating
     }
     
@@ -146,12 +157,15 @@ extension Trie {
     /// search failed.
     private func findLastNodeOf(word: String) -> Node? {
         var currentNode = root
-        for character in word.lowercased() {
+        let collection = useCaseSensitive ? word : word.lowercased()
+
+        for character in collection {
             guard let childNode = currentNode.children[character] else {
                 return nil
             }
             currentNode = childNode
         }
+        
         return currentNode
     }
     
@@ -240,16 +254,19 @@ extension Trie {
     /// - Returns: the words in the subtrie that start with prefix
     func findWordsWithPrefix(prefix: String) -> [String] {
         var words = [String]()
-        let prefixLowerCased = prefix.lowercased()
+        let prefixLowerCased = useCaseSensitive ? prefix : prefix.lowercased()
+        
         if let lastNode = findLastNodeOf(word: prefixLowerCased) {
             if lastNode.isTerminating {
                 words.append(prefixLowerCased)
             }
+            
             for childNode in lastNode.children.values {
                 let childWords = wordsInSubtrie(rootNode: childNode, partialWord: prefixLowerCased)
                 words += childWords
             }
         }
+        
         return words
     }
 }

@@ -86,7 +86,7 @@ class ListPlacesViewModel: ObservableObject {
             .removeDuplicates()
             .debounce(for: .seconds(3), scheduler: DispatchQueue.main)
             .sink { [weak self] searchText in
-                self?.applyFilter(with: searchText.lowercased())
+                self?.applyFilter(with: searchText)
             }
             .store(in: &subscriptions)
     }

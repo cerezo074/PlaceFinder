@@ -14,10 +14,10 @@ protocol ModelIDs {
 
 extension ModelIDs {
     var uniqueID: String {
-        "\(sortID),\(coordinate.latitude),\(coordinate.longitude)".lowercased()
+        "\(sortID),\(coordinate.latitude),\(coordinate.longitude)"
     }
     
     var sortID: String {
-        "\(name),\(country)".lowercased()
+        "\(name),\(country)"
     }
 }
