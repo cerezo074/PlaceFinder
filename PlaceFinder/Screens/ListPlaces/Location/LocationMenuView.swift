@@ -16,7 +16,7 @@ struct LocationMenuView: View {
     let isLoading: Bool
     let items: [LocationViewModel]
     let toggleSelectedItem: (LocationViewModel) -> Void
-
+    
     var body: some View {
         VStack {
             SearchBar(
@@ -58,23 +58,26 @@ struct MenuRowItemView: View {
     
     var body: some View {
         HStack {
+            VStack(alignment: .leading, spacing: 9) {
                 Text(viewModel.menuTitle)
-                    .padding()
-                    .cornerRadius(8)
-                    .onTapGesture {
-                        didTapItem(viewModel)
-                    }
-                
-                Spacer()
-                
-                Button(action: {
-                    didTapFavorite(viewModel)
-                }) {
-                    Image(systemName: viewModel.isFavorite ? "star.fill" : "star")
-                        .foregroundColor(viewModel.isFavorite ? .yellow : .gray)
-                }
-                .buttonStyle(.plain)
-                .padding(.trailing, 8)
+                Text(viewModel.detailDescription)
+                    .font(.subheadline)
+            }
+            .padding(7)
+            .onTapGesture {
+                didTapItem(viewModel)
+            }
+            
+            Spacer()
+            
+            Button(action: {
+                didTapFavorite(viewModel)
+            }) {
+                Image(systemName: viewModel.isFavorite ? "star.fill" : "star")
+                    .foregroundColor(viewModel.isFavorite ? .yellow : .gray)
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 8)
         }
         .frame(maxWidth: .infinity)
     }

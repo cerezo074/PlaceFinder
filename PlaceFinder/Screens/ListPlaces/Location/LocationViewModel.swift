@@ -41,6 +41,10 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
         "\(index + 1). \(name), \(country)"
     }
     
+    var detailDescription: String {
+        "(\(latitude), \(longitude))"
+    }
+    
     var locationCoordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
