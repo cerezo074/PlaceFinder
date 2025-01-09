@@ -22,6 +22,7 @@ class ListPlacesRepository: ListPlacesDataServices {
     private let networkServices: NetworkServices
     private let placesDB: any Database<PlaceEntity>
     private var inMemoryPlaces: [PlaceModel]
+    private var favorites: Set<FavoritePlaceModel>
     
     init(
         networkServices: NetworkServices,
@@ -30,10 +31,12 @@ class ListPlacesRepository: ListPlacesDataServices {
         self.placesDB = placesDB
         self.networkServices = networkServices
         inMemoryPlaces = []
+        favorites = []
     }
     
     func loadAllPlaces() async {
         do {
+            try loadFavorites()
             try await loadFromRemoteSource()
         } catch {
             print("Error: \(error)")
@@ -57,12 +60,14 @@ class ListPlacesRepository: ListPlacesDataServices {
     
     func update(place: PlaceModel) throws {
         let entity = PlaceEntity(from: place)
-        try placesDB.update(entity)
-        
-        // TODO: Update the trie if the place is favorite or not insert/remove it.
-        
-        if let placeIndex = inMemoryPlaces.firstIndex(where: { $0.id == place.id }) {
-            inMemoryPlaces[placeIndex] = place
+        let favoritePlace = FavoritePlaceModel(from: place)
+
+        if place.isFavorite, !favorites.contains(favoritePlace) {
+            try placesDB.update(entity)
+            favorites.insert(favoritePlace)
+        } else {
+            try placesDB.delete(entity)
+            favorites.remove(favoritePlace)
         }
     }
     
@@ -76,12 +81,13 @@ class ListPlacesRepository: ListPlacesDataServices {
         return []
     }
     
-    private func loadFromLocalSource() throws -> [PlaceModel] {
-        // TODO: We gotta read it by batches and not all at once like with a pagination
-        return try placesDB.read(
+    private func loadFavorites() throws {
+        let favoritePlaces = try placesDB.read(
             sortBy: SortDescriptor<PlaceEntity>(\.name), SortDescriptor<PlaceEntity>(\.country)
         )
-        .map { PlaceModel(from: $0) }
+        .map { FavoritePlaceModel(from: $0) }
+        
+        self.favorites = Set(favoritePlaces)
     }
     
     private func loadFromRemoteSource() async throws {
@@ -90,12 +96,18 @@ class ListPlacesRepository: ListPlacesDataServices {
             with: PlaceEndpointTypes.fetchAll
         ) ?? []
         
-        let placeModels = placesDTO.map { PlaceModel(from: $0) }
+        var placeModels: [PlaceModel] = []
         
+        for placeDTO in placesDTO {
+            var placeModel = PlaceModel(from: placeDTO)
+            let favoriteModel = FavoritePlaceModel(from: placeModel)
+            placeModel.isFavorite = favorites.contains(favoriteModel)
+            placeModels.append(placeModel)
+        }
+                
         self.inMemoryPlaces = placeModels.sorted { leftModel, rightModel in
             leftModel.sortID < rightModel.sortID
         }
     }
-    
 }
 

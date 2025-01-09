@@ -26,7 +26,7 @@ final class PlaceEntity {
         longitude: Double,
         isFavorite: Bool
     ) {
-        self.id = "\(country),\(name),\(latitude),\(longitude)"
+        self.id = "\(name),\(country),\(latitude),\(longitude)"
         self.country = country
         self.name = name
         self.latitude = latitude

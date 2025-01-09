@@ -11,12 +11,12 @@ struct PlaceModel: Codable, Hashable {
     let coordinate: CoordinateModel
     var isFavorite: Bool
     
-    var id: String {
-        "\(country),\(name),\(coordinate.latitude),\(coordinate.longitude)"
+    var uniqueID: String {
+        "\(sortID),\(coordinate.latitude),\(coordinate.longitude)"
     }
     
     var sortID: String {
-        "\(name), \(country)"
+        "\(name),\(country)"
     }
     
     init(

@@ -56,10 +56,7 @@ extension SwiftDatabase {
     
     func delete<T: PersistentModel>(_ item: T) throws {
         let context = ModelContext(container)
-        let idToDelete = item.persistentModelID
-        try context.delete(model: T.self, where: #Predicate { item in
-            item.persistentModelID == idToDelete
-        })
+        try context.delete(model: T.self)
         try context.save()
     }
 }
