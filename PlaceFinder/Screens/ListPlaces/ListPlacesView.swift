@@ -64,11 +64,49 @@ struct ListPlacesView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-            
         }
     }
     
-    private func displayCountries(with countries: [LocationViewModel]) -> some View {
+    private var emptyCountriesView: some View {
+        VStack {
+            Text("Sorry there are no countries matching your search")
+                .fontWeight(.semibold)
+                .font(.headline)
+                .padding(.bottom, 20)
+                .multilineTextAlignment(.center)
+            Button {
+                Task {
+                    await viewModel.reloadContent()
+                }
+            } label: {
+                Text("Tap to reset")
+                    .font(.callout)
+                    .padding()
+                    .background(.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var landscapeMapView: some View {
+        if let selectedItem = viewModel.selectedItem {
+            LocationMapView(
+                selectedItem: selectedItem,
+                backButtonAction: nil
+            )
+            .frame(maxWidth: .infinity)
+            .background(Color(UIColor.systemBackground))
+        } else {
+            Text("Select an item from the list")
+                .font(.title)
+                .foregroundColor(.gray)
+                .padding()
+        }
+    }
+    
+    private func makeDefaultCountriesView(with countries: [LocationViewModel]) -> some View {
         ZStack {
             if isLandscape {
                 HStack {
@@ -99,6 +137,15 @@ struct ListPlacesView: View {
         }
     }
     
+    @ViewBuilder
+    private func displayCountries(with countries: [LocationViewModel]) -> some View {
+        if countries.isEmpty {
+            emptyCountriesView
+        } else {
+            makeDefaultCountriesView(with: countries)
+        }
+    }
+    
     private func makeMenuView(with countries: [LocationViewModel]) -> some View {
         LocationMenuView(
             selectedItem: $viewModel.selectedItem,
@@ -109,20 +156,4 @@ struct ListPlacesView: View {
         )
     }
     
-    @ViewBuilder
-    private var landscapeMapView: some View {
-        if let selectedItem = viewModel.selectedItem {
-            LocationMapView(
-                selectedItem: selectedItem,
-                backButtonAction: nil
-            )
-            .frame(maxWidth: .infinity)
-            .background(Color(UIColor.systemBackground))
-        } else {
-            Text("Select an item from the list")
-                .font(.title)
-                .foregroundColor(.gray)
-                .padding()
-        }
-    }
 }

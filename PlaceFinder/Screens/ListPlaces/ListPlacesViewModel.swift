@@ -52,6 +52,15 @@ class ListPlacesViewModel: ObservableObject {
         await fetchPlaces()
     }
     
+    func reloadContent() async {
+        await callOnMainThread { [weak self] in
+            self?.isLoadingSearchResults = false
+            self?.searchText = ""
+        }
+        
+        await fetchPlaces()
+    }
+    
     private func listenToSearchTextChanges() {
         $searchText
             .dropFirst()
