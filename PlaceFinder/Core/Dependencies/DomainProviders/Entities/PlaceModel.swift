@@ -12,7 +12,7 @@ struct PlaceModel: Codable, Hashable {
     var isFavorite: Bool
     
     var id: String {
-        "\(country),\(name),\(coordinate.lat),\(coordinate.lon)"
+        "\(country),\(name),\(coordinate.latitude),\(coordinate.longitude)"
     }
     
     var prefixSearch: String {
@@ -41,7 +41,10 @@ struct PlaceModel: Codable, Hashable {
     init(from entity: PlaceEntity) {
         self.country = entity.country
         self.name = entity.name
-        self.coordinate = CoordinateModel(lon: entity.lon, lat: entity.lon)
+        self.coordinate = CoordinateModel(
+            latitude: entity.latitude,
+            longitude: entity.longitude
+        )
         self.isFavorite = entity.isFavorite
     }
     
@@ -49,8 +52,8 @@ struct PlaceModel: Codable, Hashable {
         self.country = locationViewModel.country
         self.name = locationViewModel.name
         self.coordinate = CoordinateModel(
-            lon: locationViewModel.longitude,
-            lat: locationViewModel.latitude
+            latitude: locationViewModel.latitude,
+            longitude: locationViewModel.longitude
         )
         self.isFavorite = locationViewModel.isFavorite
     }

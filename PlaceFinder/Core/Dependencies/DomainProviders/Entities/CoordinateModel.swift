@@ -6,17 +6,17 @@
 //
 
 struct CoordinateModel: Codable, Hashable {
-    let lon: Double
-    let lat: Double
+    let latitude: Double
+    let longitude: Double
     
-    init(lon: Double, lat: Double) {
-        self.lon = lon
-        self.lat = lat
+    init(latitude: Double, longitude: Double) {
+        self.longitude = longitude
+        self.latitude = latitude
     }
     
     init(from DTO: CoordinateDTO) {
-        self.lat = DTO.lat
-        self.lon = DTO.lon
+        self.latitude = DTO.latitude
+        self.longitude = DTO.longitude
     }
 
 }

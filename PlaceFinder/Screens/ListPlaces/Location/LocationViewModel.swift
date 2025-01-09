@@ -75,8 +75,8 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
             index: index,
             name: place.name,
             country: place.country,
-            latitude: place.coordinate.lat,
-            longitude: place.coordinate.lat,
+            latitude: place.coordinate.latitude,
+            longitude: place.coordinate.longitude,
             isFavorite: place.isFavorite,
             domainDependencies: domainDependencies
         )
@@ -84,7 +84,7 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
 
     func validateLocation() async {
         do {
-            try await domainDependencies.isLocationValid(lat: latitude, lng: longitude)
+            try await domainDependencies.isLocationValid(latitude: latitude, longitude: longitude)
             
             await callOnMainThread { [weak self] in
                 self?.locationState = .success

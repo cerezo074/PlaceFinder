@@ -47,11 +47,12 @@ class ListPlacesViewModel: ObservableObject {
     }
     
     func viewDidAppear() async {
+        await fetchPlaces()
+
         guard !didLoadView else { return }
         didLoadView = true
         
         listenToSearchTextChanges()
-        await fetchPlaces()
     }
     
     func reloadContent() async {

@@ -38,8 +38,8 @@ class PlacesController: PlacesServices, PlaceValidatorServices {
         try await repository.fetchAllPlaces()
     }
     
-    func isLocationValid(lat: Double, lng: Double) async throws {
-        try await validator.isLocationValid(lat: lat, lng: lng)
+    func isLocationValid(latitude: Double, longitude: Double) async throws {
+        try await validator.isLocationValid(latitude: latitude, longitude: longitude)
     }
     
     func update(place: PlaceModel) throws {

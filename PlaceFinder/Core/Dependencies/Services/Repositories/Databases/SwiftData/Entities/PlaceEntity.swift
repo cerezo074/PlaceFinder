@@ -15,22 +15,22 @@ final class PlaceEntity {
     private(set) var id: String
     private(set) var country: String
     private(set) var name: String
-    private(set) var lon: Double
-    private(set) var lat: Double
+    private(set) var latitude: Double
+    private(set) var longitude: Double
     var isFavorite: Bool
     
     init(
         country: String,
         name: String,
-        lon: Double,
-        lat: Double,
+        latitude: Double,
+        longitude: Double,
         isFavorite: Bool
     ) {
-        self.id = "\(country),\(name),\(lat),\(lon)"
+        self.id = "\(country),\(name),\(latitude),\(longitude)"
         self.country = country
         self.name = name
-        self.lat = lat
-        self.lon = lon
+        self.latitude = latitude
+        self.longitude = longitude
         self.isFavorite = isFavorite
     }
     
@@ -38,8 +38,8 @@ final class PlaceEntity {
         self.init(
             country: DTO.country,
             name: DTO.name,
-            lon: DTO.coordinate.lon,
-            lat: DTO.coordinate.lat,
+            latitude: DTO.coordinate.latitude,
+            longitude: DTO.coordinate.longitude,
             isFavorite: false
         )
     }
@@ -48,8 +48,8 @@ final class PlaceEntity {
         self.init(
             country: model.country,
             name: model.name,
-            lon: model.coordinate.lon,
-            lat: model.coordinate.lat,
+            latitude: model.coordinate.latitude,
+            longitude: model.coordinate.longitude,
             isFavorite: model.isFavorite
         )
     }

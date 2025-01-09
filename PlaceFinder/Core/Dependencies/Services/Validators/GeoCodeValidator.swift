@@ -12,7 +12,7 @@ protocol PlaceValidatorProvider {
 }
 
 protocol PlaceValidatorServices: AnyObject {
-    func isLocationValid(lat: Double, lng: Double) async throws
+    func isLocationValid(latitude: Double, longitude: Double) async throws
 }
 
 protocol CLGeocoderInterface {
@@ -43,8 +43,8 @@ class GeoCodeValidator: PlaceValidatorServices {
         self.geocoder = geocoder
     }
     
-    func isLocationValid(lat: Double, lng: Double) async throws {
-        let locationCoordinate = CLLocationCoordinate2D(latitude: lat, longitude: lng)
+    func isLocationValid(latitude: Double, longitude: Double) async throws {
+        let locationCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         
         if !isValidCoordinate(locationCoordinate) {
             throw LocationError.invalidCoordinate
