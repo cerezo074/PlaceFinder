@@ -25,7 +25,6 @@ class ListPlacesViewModel: ObservableObject {
     @Published
     var isLoadingSearchResults: Bool
     let searchPlaceholder: String
-    private var locations: [LocationViewModel]
     private var didLoadView: Bool
     private var subscriptions: Set<AnyCancellable>
     private let placesProvider: PlacesServices
@@ -43,7 +42,6 @@ class ListPlacesViewModel: ObservableObject {
         self.subscriptions = []
         self.didLoadView = false
         self.isLoadingSearchResults = false
-        self.locations = []
     }
     
     func viewDidAppear() async {
@@ -106,7 +104,6 @@ class ListPlacesViewModel: ObservableObject {
                     domainDependencies: placesValidator
                 )
             }
-            self.locations = countries
             
             await callOnMainThread { [weak self] in
                 self?.listViewState = .showCountries(locations: countries)
