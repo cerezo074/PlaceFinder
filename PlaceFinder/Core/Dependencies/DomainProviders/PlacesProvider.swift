@@ -12,7 +12,7 @@ protocol PlacesProvider {
 }
 
 protocol PlacesServices {
-    func loadData() async
+    func loadData() async throws
     func getAllPlaces() async throws -> [PlaceModel]
     func update(place: PlaceModel) throws
     func filterPlaces(by prefix: String) throws -> [PlaceModel]
@@ -30,8 +30,8 @@ class PlacesController: PlacesServices, PlaceValidatorServices {
         self.validator = validator
     }
 
-    func loadData() async {
-        await repository.loadAllPlaces()
+    func loadData() async throws {
+        try await repository.loadAllPlaces()
     }
     
     func getAllPlaces() async throws -> [PlaceModel] {

@@ -12,7 +12,7 @@ protocol ListPlacesDataProvider {
 }
 
 protocol ListPlacesDataServices: AnyObject {
-    func loadAllPlaces() async
+    func loadAllPlaces() async throws
     func fetchAllPlaces() async throws -> [PlaceModel]
     func update(place: PlaceModel) throws
     func getFavoritesPlaces(by prefix: String) -> [PlaceModel]
@@ -36,13 +36,9 @@ class ListPlacesRepository: ListPlacesDataServices {
         favoritesTrie = Trie()
     }
     
-    func loadAllPlaces() async {
-        do {
-            try loadFavorites()
-            try await loadFromRemoteSource()
-        } catch {
-            print("Error: \(error)")
-        }
+    func loadAllPlaces() async throws {
+        try loadFavorites()
+        try await loadFromRemoteSource()
     }
     
     func fetchAllPlaces() async throws -> [PlaceModel] {
@@ -50,14 +46,8 @@ class ListPlacesRepository: ListPlacesDataServices {
             return inMemoryPlaces
         }
         
-        guard let placesDTO = try await networkServices.fetchData(
-            of: [PlaceDTO].self,
-            with: PlaceEndpointTypes.fetchAll
-        ) else {
-            return []
-        }
-        
-        return placesDTO.map { PlaceModel(from: $0) }
+        try await loadFromRemoteSource()
+        return inMemoryPlaces
     }
     
     func update(place: PlaceModel) throws {
@@ -92,8 +82,12 @@ class ListPlacesRepository: ListPlacesDataServices {
             }
         let targetResults: Set<FavoritePlaceModel> = Set(prefixResults)
         
-        return favoritesContainer.intersection(targetResults)
+        let matches = favoritesContainer.intersection(targetResults)
             .map { PlaceModel(from: $0) }
+        
+        return matches.sorted { leftModel, rightModel in
+            leftModel.sortID < rightModel.sortID
+        }
     }
     
     private func loadFavorites() throws {

@@ -22,7 +22,12 @@ class SplashScreenViewModel: ObservableObject {
     }
     
     func viewDidAppear() async {
-        await domainDependencies.loadData()
+        do {
+            try await domainDependencies.loadData()
+        } catch {
+            print("Error loading data: \(error)")
+        }
+        
         await callOnMainThread { [weak self] in
             self?.didFinishLoading()
             self?.isAnimating = false

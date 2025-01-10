@@ -18,6 +18,13 @@ struct PlaceDTO: Decodable, Hashable {
         case coordinate = "coord"
     }
     
+    init(country: String, name: String, id: Int, coordinate: CoordinateDTO) {
+        self.country = country
+        self.name = name
+        self.id = id
+        self.coordinate = coordinate
+    }
+    
     func hash(into hasher: inout Hasher) {
         hasher.combine(country)
         hasher.combine(name)
@@ -28,6 +35,11 @@ struct PlaceDTO: Decodable, Hashable {
 struct CoordinateDTO: Codable, Hashable {
     let latitude: Double
     let longitude: Double
+    
+    init(latitude: Double, longitude: Double) {
+        self.latitude = latitude
+        self.longitude = longitude
+    }
     
     enum CodingKeys: String, CodingKey {
         case latitude = "lat"
