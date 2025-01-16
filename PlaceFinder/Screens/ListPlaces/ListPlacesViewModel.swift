@@ -16,19 +16,31 @@ class ListPlacesViewModel: ObservableObject {
         case showCountries(locations: [LocationViewModel])
     }
     
-    @Published
-    private(set) var listViewState: ListViewState
+    // MARK: - Constants
+
+    let loadingText = "Loading..."
+    let errorLoadingCountriesText = "Sorry there was an error loading the countries"
+    let retryText = "Tap to retry"
+    let noCountriesFoundText = "Sorry there are no countries matching your search"
+    let resetText = "Tap to reset"
+    let selectItemText = "Select an item from the list"
+    let masterDetailTitle = "Master-Detail"
+    let itemsTitle = "Items"
+    let searchPlaceholder = "Type to show your favorite places"
+    
     @Published
     var selectedItem: LocationViewModel?
     @Published
     var searchText: String
     @Published
     var isLoadingSearchResults: Bool
-    let searchPlaceholder: String
-    private var didLoadView: Bool
-    private var subscriptions: Set<AnyCancellable>
+    @Published
+    private(set) var listViewState: ListViewState
+    
     private let placesProvider: PlacesServices
     private let placesValidator: PlaceValidatorServices
+    private var didLoadView: Bool
+    private var subscriptions: Set<AnyCancellable>
     
     init(
         placesProvider: PlacesServices,
@@ -38,7 +50,6 @@ class ListPlacesViewModel: ObservableObject {
         self.placesValidator = placesValidator
         self.listViewState = .loading
         self.searchText = ""
-        self.searchPlaceholder = "Type to show your favorite places"
         self.subscriptions = []
         self.didLoadView = false
         self.isLoadingSearchResults = false

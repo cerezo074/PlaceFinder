@@ -6,7 +6,8 @@
 //
 
 import SwiftUI
-import MapKit
+import CoreLocation
+import Combine
 
 class LocationViewModel: ObservableObject, Identifiable, Hashable {
     typealias DomainDependencies = PlaceValidatorServices
@@ -21,12 +22,19 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
     var locationState: LocationState
     @Published
     var isFavorite: Bool
+    var updateCameraPosition = PassthroughSubject<Void, Never>()
+    
+    // MARK: - Constants
+
+    let loadingMessage = "Checking location…"
+    let backButtonLabel = "Back"
     let index: Int
     let name: String
     let country: String
     let latitude: Double
     let longitude: Double
-        
+    let locationCoordinate: CLLocationCoordinate2D
+
     // MARK: - Computed
     
     var id: Int {
@@ -44,11 +52,7 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
     var detailDescription: String {
         "(\(latitude), \(longitude))"
     }
-    
-    var locationCoordinate: CLLocationCoordinate2D {
-        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-    }
-    
+        
     private let domainDependencies: DomainDependencies
     
     init(
@@ -68,6 +72,7 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
         self.isFavorite = isFavorite
         self.locationState = .loading
         self.domainDependencies = domainDependencies
+        locationCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
     
     convenience init(
@@ -97,6 +102,12 @@ class LocationViewModel: ObservableObject, Identifiable, Hashable {
             await callOnMainThread { [weak self] in
                 self?.locationState = .failure("There is an error with the current location: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    func refreshCameraManually(task: TaskQueue = AsyncQueueExecutor()) {
+        task.execute { [weak self] in
+            self?.updateCameraPosition.send(())
         }
     }
     

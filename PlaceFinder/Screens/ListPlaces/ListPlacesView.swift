@@ -32,7 +32,7 @@ struct ListPlacesView: View {
     var body: some View {
         switch viewModel.listViewState {
         case .loading:
-            ProgressView("Loading...")
+            ProgressView(viewModel.loadingText)
                 .task {
                     await viewModel.viewDidAppear()
                 }
@@ -47,44 +47,44 @@ struct ListPlacesView: View {
     
     private var retryButton: some View {
         VStack {
-            Text("Sorry there was an error loading the countries")
+            Text(viewModel.errorLoadingCountriesText)
                 .fontWeight(.semibold)
                 .font(.headline)
-                .padding(.bottom, 20)
+                .padding(.bottom, Constants.bottomPadding)
                 .multilineTextAlignment(.center)
             Button {
                 Task {
                     await viewModel.viewDidAppear()
                 }
             } label: {
-                Text("Tap to retry")
+                Text(viewModel.retryText)
                     .font(.callout)
                     .padding()
                     .background(.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(Constants.cornerRadius)
             }
         }
     }
     
     private var emptyCountriesView: some View {
         VStack {
-            Text("Sorry there are no countries matching your search")
+            Text(viewModel.noCountriesFoundText)
                 .fontWeight(.semibold)
                 .font(.headline)
-                .padding(.bottom, 20)
+                .padding(.bottom, Constants.bottomPadding)
                 .multilineTextAlignment(.center)
             Button {
                 Task {
                     await viewModel.reloadContent()
                 }
             } label: {
-                Text("Tap to reset")
+                Text(viewModel.resetText)
                     .font(.callout)
                     .padding()
                     .background(.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(Constants.cornerRadius)
             }
         }
     }
@@ -94,12 +94,13 @@ struct ListPlacesView: View {
         if let selectedItem = viewModel.selectedItem {
             LocationMapView(
                 selectedItem: selectedItem,
+                refreshCameraManually: true,
                 backButtonAction: nil
             )
             .frame(maxWidth: .infinity)
             .background(Color(UIColor.systemBackground))
         } else {
-            Text("Select an item from the list")
+            Text(viewModel.selectItemText)
                 .font(.title)
                 .foregroundColor(.gray)
                 .padding()
@@ -107,22 +108,22 @@ struct ListPlacesView: View {
     }
     
     private func makeDefaultCountriesView(with countries: [LocationViewModel]) -> some View {
-        ZStack {
+        VStack {
             if isLandscape {
                 HStack {
                     makeMenuView(with: countries)
-                    .frame(maxWidth: 300)
-                    .background(Color(UIColor.systemGroupedBackground))
+                    .frame(maxWidth: Constants.menuMaxWidth)
+                    .background(Color(.systemGroupedBackground))
                     landscapeMapView
                 }
-                .navigationTitle("Master-Detail")
+                .navigationTitle(viewModel.masterDetailTitle)
             } else {
                 makeMenuView(with: countries)
                 .onReceive(viewModel.$selectedItem) { selectedItem in
                     guard let selectedItem else { return }
                     appCoordinator.baseNavigationPath.append(selectedItem)
                 }
-                .navigationTitle("Items")
+                .navigationTitle(viewModel.itemsTitle)
             }
         }.onChange(of: isLandscape, { oldValue, newValue in
             if newValue, !appCoordinator.baseNavigationPath.isEmpty {
@@ -130,7 +131,7 @@ struct ListPlacesView: View {
             }
         })
         .navigationDestination(for: LocationViewModel.self) { selectedItem in
-            LocationMapView(selectedItem: selectedItem) {
+            LocationMapView(selectedItem: selectedItem, refreshCameraManually: false) {
                 viewModel.selectedItem = nil
                 appCoordinator.baseNavigationPath.removeLast()
             }
@@ -153,7 +154,7 @@ struct ListPlacesView: View {
             placeholder: viewModel.searchPlaceholder,
             isLoading: viewModel.isLoadingSearchResults,
             items: countries,
-            toggleSelectedItem: { [weak viewModel] locationViewModel in
+            toggleFavoriteItem: { [weak viewModel] locationViewModel in
                 guard let viewModel else { return }
                 
                 Task {
@@ -162,4 +163,13 @@ struct ListPlacesView: View {
             }
         )
     }
+    
+    // MARK: - Constants
+
+    enum Constants {        
+        static let bottomPadding: CGFloat = 20
+        static let cornerRadius: CGFloat = 10
+        static let menuMaxWidth: CGFloat = 300
+    }
+    
 }

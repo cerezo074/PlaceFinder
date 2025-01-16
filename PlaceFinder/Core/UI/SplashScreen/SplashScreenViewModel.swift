@@ -15,6 +15,7 @@ class SplashScreenViewModel: ObservableObject {
     
     private let domainDependencies: DomainDependencies
     private let didFinishLoading: VoidClousure
+    let title = "Place Finder..."
     
     init(domainDependencies: DomainDependencies, didFinishLoading: @escaping VoidClousure) {
         self.domainDependencies = domainDependencies

@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct SearchBar: View {
-    @Binding
-    var text: String
+    @Binding var text: String
     let isLoading: Bool
     let placeholder: String
 
@@ -17,25 +16,36 @@ struct SearchBar: View {
         HStack {
             TextField(placeholder, text: $text)
                 .textFieldStyle(.roundedBorder)
-                .padding(.leading, 8)
+                .padding(.leading, Constants.textFieldPaddingLeading)
                 .disabled(isLoading)
 
             if !text.isEmpty, !isLoading {
-                Button(action: {
-                    text = ""
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.gray)
+                Button(action: { text = "" }) {
+                    Image(systemName: Constants.clearButtonImage)
+                        .foregroundColor(Constants.clearButtonColor)
                 }
-                .padding(.trailing, 8)
+                .padding(.trailing, Constants.buttonPaddingTrailing)
             } else if isLoading {
                 ProgressView()
             }
         }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 8)
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
-        .padding(.horizontal)
+        .padding(.vertical, Constants.containerPaddingVertical)
+        .padding(.horizontal, Constants.containerPaddingHorizontal)
+        .background(Constants.backgroundColor)
+        .cornerRadius(Constants.cornerRadius)
+        .padding(.horizontal, Constants.overallPaddingHorizontal)
+    }
+    
+    // MARK: - Constants
+    private enum Constants {
+        static let textFieldPaddingLeading: CGFloat = 8
+        static let buttonPaddingTrailing: CGFloat = 8
+        static let containerPaddingVertical: CGFloat = 4
+        static let containerPaddingHorizontal: CGFloat = 8
+        static let backgroundColor = Color(.systemGray6)
+        static let cornerRadius: CGFloat = 8
+        static let overallPaddingHorizontal: CGFloat = 16
+        static let clearButtonImage = "xmark.circle.fill"
+        static let clearButtonColor = Color.gray
     }
 }
